@@ -8,6 +8,7 @@ import Admin from "./screens/Admin"
 import {createStackNavigator} from "@react-navigation/stack"
 import { NavigationContainer } from '@react-navigation/native';
 import Batch from './screens/Batch';
+import Promotion from "./screens/Promotion"
 
 const Stack = createStackNavigator()
 
@@ -29,6 +30,8 @@ export default function App() {
       <Stack.Screen name="Sales" component={Sales} />
       <Stack.Screen name="Batch" component={Batch} />
       <Stack.Screen name="Admin" component={Admin} />
+      <Stack.Screen name="Promotion" component={Promotion}/>
+      
     </Stack.Navigator>
     </NavigationContainer>
     

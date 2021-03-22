@@ -3,7 +3,7 @@ import React, { useState  , useRef , useEffect} from 'react'
 import { StatusBar, Platform , FlatList, Picker, Modal ,Image, Animated, Text, View, Dimensions, StyleSheet, TouchableOpacity, Easing, SafeAreaViewBase, SafeAreaView, SnapshotViewIOS, Pressable, TextInput, Alert } from 'react-native';
 const { width, height } = Dimensions.get('screen');
 import faker from 'faker'
-import {orders } from "./SignIn"
+import {orders , sales } from "./SignIn"
 import {shirt} from "../assets/image/Shirts"
 import Swipeout from 'react-native-swipeout'
 import {pickShirt} from "./Home"
@@ -11,6 +11,7 @@ import * as firebase from "firebase"
 import DatePicker from 'react-native-datepicker'
 import * as Notifications from 'expo-notifications';
 import Constants from 'expo-constants';
+import { Row } from 'native-base';
 
 
 Notifications.setNotificationHandler({
@@ -29,8 +30,14 @@ export default function Admin({navigation}) {
     const [sms , setSms] = useState("")
     const [title , setTitle] = useState("") 
     const [notvisible  , setNotVisible] = useState(false)
+    const [purchasevis , setPurchasevis] = useState(false)  
+    const [salesvis , setSalesvis] = useState(false)
+    const [orderState , setOrderState] = useState(false)
+    const [record  , setRecord]= useState(orders[0])
     const notificationListener = useRef();
     const responseListener = useRef();
+
+
 
     useEffect(() => {
         registerForPushNotificationsAsync().then(token => setExpoPushToken(token));
@@ -103,8 +110,10 @@ export default function Admin({navigation}) {
             firebase.app()
             
         }
+
+        
  
-        const [DATA , setOrders] = useState(orders)
+        const [DATA , setOrders] = useState(updateDatabase2())
         const ordersRef = firebase.database().ref("/Orders")
         const scrollY = React.useRef(new Animated.Value(0)).current
 
@@ -121,15 +130,98 @@ export default function Admin({navigation}) {
                 ],
                 { cancelable: false }
               ))
+        }
+
+        function totalPurchase(agent){
+
+          var count=0;
+
+          DATA.forEach((item) =>{
+
+            if (item.agent==agent) count++;
+
+          })
+
+       return count
+        }
+
+        function totalSales(agent){
+          var count =0;
+          sales.forEach((item) =>{
+
+            if (item.agent==agent) count++;
+
+          })
+
+       return count
+
+        }
+
+        function updateDatabase() {
+
+          var orderss =[]
+          //setOrdersRef(firebase.database().ref("/Orders"))
+      //  const ordersRefs= ;
+
+  
+      firebase.database().ref("/Orders").once('value' , function(snapshot){
+        
+              snapshot.forEach(element => {
+                var key =  element.key;
+                var data = element.val();
+          
+                orderss.push({key:key,tag:data.Tag, agent: data.Agent,delivery:data.Delivery ,  batch:data.Batch , quantity:data.Quanitity , buyer: data.Buyer ,color: data.Color ,design:data.Design , size: data.Size , font: data.Font})
+              });
+          })
+  
+         setOrders(orderss)
+
+
+      }
+
+      function updateDatabase2() {
+
+        var orderss =[]
+        //setOrdersRef(firebase.database().ref("/Orders"))
+    //  const ordersRefs= ;
+
+
+    firebase.database().ref("/Orders").once('value' , function(snapshot){
+      
+            snapshot.forEach(element => {
+              var key =  element.key;
+              var data = element.val();
+        
+              orderss.push({key:key,tag:data.Tag, agent: data.Agent,delivery:data.Delivery ,  batch:data.Batch , quantity:data.Quanitity , buyer: data.Buyer ,color: data.Color ,design:data.Design , size: data.Size , font: data.Font})
+            });
+        })
+
+       
+       return orderss
+        
+    }
+
+        function updateTag(item , color){
+          ordersRef.child(item.key).update( {
+            Tag:color})
+            .then(()=>updateDatabase())
+            .then(()=>setOrderState(false))
+            .then(()=>alert(`${item.buyer}'s Tag color has been changed to ${color}`)) 
+            
+          }
+        function openTag(item){
+          setRecord(item)
+          setOrderState(true)
 
         }
 
 
     return (
         <View style={{flex: 1, backgroundColor: '#fff'}}>
+    
 
             <Image
-                source={require("../assets/image/worshipp.jpg")}
+                source={require("../assets/image/admins.jpg")}
                 style={StyleSheet.absoluteFillObject}
                 blurRadius={50}
             />
@@ -160,6 +252,7 @@ export default function Admin({navigation}) {
             style={{
                 backgroundColor:"#DAF7A6" , 
                 width: 200 , height:50 ,
+               
                  borderRadius:15 ,
                  marginBottom:20,
                  justifyContent: 'center',
@@ -173,20 +266,57 @@ export default function Admin({navigation}) {
           </View>
           </View>
 
-          <View style={styles.centeredView}>
+          <View style={
+            {
+              flex: 1,
+              justifyContent: "center",
+              alignItems: "center",
+              marginTop: 22,
+              marginBottom:35
+            }
+           }>
           <TouchableOpacity 
             style={{
-                width: 200 , height:50 ,
-                 borderRadius:15 ,
-                 alignItems:'center'
+                width: 200 , height:40,
+                 borderRadius:0 ,
+                 alignItems:'center',
+                 borderColor: "#ffff",
+                 borderWidth: 2,
+                 justifyContent:'center'
+
+             
                
            }}
-             onPress={() => navigation.navigate("Admin")}
+             onPress={() => setPurchasevis(true)}
               >
                   
-            <Text style={{color:"#ffff" , fontSize:15}}>Admin </Text>
+            <Text style={{color:"#ffff" , fontSize:15}}>Agents Purchases </Text>
           </TouchableOpacity>
           </View>
+
+          <View style={{flex: 1,
+              justifyContent: "center",
+              alignItems: "center",
+              marginTop: 22,
+              marginBottom:15}}>
+          <TouchableOpacity 
+            style={{
+                width: 200 , height:40 ,
+                 borderRadius:0 ,
+                 alignItems:'center',
+                 borderColor: "#ffff",
+                 borderWidth: 2,
+                 justifyContent:'center'
+               
+           }}
+             onPress={() => setSalesvis(true)}
+              >
+                  
+            <Text style={{color:"#ffff" , fontSize:15}}>Agents Sales </Text>
+          </TouchableOpacity>
+          </View>
+
+          
 
           
 
@@ -285,8 +415,26 @@ export default function Admin({navigation}) {
                         resizeMode="contain"
                        />
                         <View>
-                            <Text style={{fontSize:22 , fontWeight:'700'}}>{item.buyer}</Text>
-                            <Text style={{fontSize:18 , opacity: 0.7}}>Size: {item.size}</Text>
+                              <View style={{flexDirection:'row' , justifyContent: 'space-between'}}>
+                            <Text style={{fontSize:22 , fontWeight:'700' }}>{item.buyer}</Text>
+                            <TouchableOpacity
+                              style={{
+                                width:50,
+                                height:25,
+                                backgroundColor:item.tag,
+                                borderRadius:0
+                              }}
+
+                              onPress={()=> openTag(item) }
+                            >
+
+
+                            </TouchableOpacity>
+                            </View>
+                            <View style={{flexDirection:'row' , justifyContent: 'space-between' , marginTop:5}}>
+                            <Text style={{fontSize:15 , opacity: 0.7}}>Size: <Text style={{fontWeight: 'bold'}}>{item.size}</Text></Text>
+                           <Text style={{fontSize:15 , opacity: 0.7}}>{'   '}Agent: <Text style={{fontWeight: 'bold'}}> {item.agent}</Text></Text>
+                            </View>
                             <View style={{flexDirection:'row'}}>
                                 <Text style={{fontSize:12, opacity:0.8 , color:'#E318F3'}}>Design: {item.design}{'     '}</Text>
                                 <Text style={{fontSize:12, opacity:0.8 , color:'#E318F3'}}>{'  '}Fonts: {item.font}</Text>
@@ -306,6 +454,7 @@ export default function Admin({navigation}) {
 
 
             />
+            {/** NOTIFICATION MODAL */}
             <Modal
                  animationType="slide"
                  transparent={true}
@@ -354,7 +503,213 @@ export default function Admin({navigation}) {
           </TouchableOpacity>
           </View>
           </Modal>
+           <Modal
+              visible={purchasevis}
+              animationType= "slide"
+              transparent={false}
+             
+           >
+             <View style={styles.centeredView}>
 
+             <Text style={{fontSize: 25 , fontWeight: 'bold'}}>Purchase Order By Agent</Text>
+
+            <View style={{marginTop:20, justifyContent: 'space-between'}}>
+              <Text style={{fontSize:20}}>Kutlo:  {totalPurchase("Kutlo")}</Text>
+              <Text style={{fontSize:20}}>Cassie:  {totalPurchase("Cassie")}</Text>
+              <Text style={{fontSize:20}}>Portia:  {totalPurchase("Portia")}</Text>
+              <Text style={{fontSize:20}}>Phaladi:  {totalPurchase("Phaladi")}</Text>
+              <Text style={{fontSize:20}}>Mooketsi:  {totalPurchase("Mooketsi")}</Text>
+              <Text style={{fontSize:20}}>Wame:  {totalPurchase("Wame")}</Text>
+              <Text style={{fontSize:20}}>Master:  {totalPurchase("Master")}</Text>
+              <Text style={{fontSize:20}}>Dimpho:  {totalPurchase("Lolo")}</Text>
+              <Text style={{fontSize:20}}>Faith:  {totalPurchase("Fatih")}</Text>
+              <Text style={{fontSize:20}}>Nelly:  {totalPurchase("Nelly")}</Text>
+              <Text style={{fontSize:25 , fontWeight: 'bold'}}>TOTAL:  {DATA.length}</Text>
+              
+            
+
+            </View>
+
+            <TouchableOpacity 
+            style={{
+                backgroundColor:"red" , 
+                width: 200 , height:50 ,
+                 borderRadius:15 ,
+                 marginTop:20,
+                 justifyContent: 'center',
+                 alignItems:'center'
+           }}
+             onPress={() => setPurchasevis(false)}
+              >
+                  
+            <Text style={{color:"#ffff" , fontSize:15}}>Close</Text>
+          </TouchableOpacity>
+           
+               
+             </View>
+            
+             
+
+           </Modal>
+
+
+           <Modal
+              visible={salesvis}
+              animationType= "slide"
+              transparent={false}
+             
+           >
+             <View style={styles.centeredView}>
+
+             <Text style={{fontSize: 25 , fontWeight: 'bold'}}>Sales By Agent</Text>
+
+            <View style={{marginTop:20, justifyContent: 'space-between'}}>
+              <Text style={{fontSize:20}}>Kutlo:  {totalSales("Kutlo")}</Text>
+              <Text style={{fontSize:20}}>Cassie:  {totalSales("Cassie")}</Text>
+              <Text style={{fontSize:20}}>Portia:  {totalSales("Portia")}</Text>
+              <Text style={{fontSize:20}}>Phaladi:  {totalSales("Phaladi")}</Text>
+              <Text style={{fontSize:20}}>Mooketsi:  {totalSales("Mooketsi")}</Text>
+              <Text style={{fontSize:20}}>Wame:  {totalSales("Wame")}</Text>
+              <Text style={{fontSize:20}}>Master:  {totalSales("Master")}</Text>
+              <Text style={{fontSize:20}}>Dimpho:  {totalSales("Lolo")}</Text>
+              <Text style={{fontSize:20}}>Faith:  {totalSales("Fatih")}</Text>
+              <Text style={{fontSize:20}}>Nelly:  {totalSales("Nelly")}</Text>
+              <Text style={{fontSize:25 , fontWeight: 'bold'}}>TOTAL:  {sales.length}</Text>
+              
+            
+
+            </View>
+
+            <TouchableOpacity 
+            style={{
+                backgroundColor:"red" , 
+                width: 200 , height:50 ,
+                 borderRadius:15 ,
+                 marginTop:20,
+                 justifyContent: 'center',
+                 alignItems:'center'
+           }}
+             onPress={() => setSalesvis(false)}
+              >
+                  
+            <Text style={{color:"#ffff" , fontSize:15}}>Close</Text>
+          </TouchableOpacity>
+           
+               
+             </View>
+           </Modal>
+
+           <View style={styles.centeredView}>
+           <Modal
+                visible= {orderState}
+                transparent={true}
+
+            >
+
+              <View style={styles.centeredView}>
+                <View style={styles.modalView}>
+
+              <Text style={{fontSize: 25 , fontWeight: 'bold' , marginBottom:20}}>Purchase Order State</Text>
+
+            <View style={{flexDirection:'row' , justifyContent:'space-between'}}>
+              <TouchableOpacity 
+            style={{
+                backgroundColor:"red" , 
+                width: 45 , height:45 ,
+                 borderRadius:40 ,
+                 marginBottom:25,
+                 justifyContent: 'center',
+                 alignItems:'center'
+           }}
+             onPress={() => updateTag(record , "red")}
+              >
+          </TouchableOpacity>
+          <TouchableOpacity 
+            style={{
+                backgroundColor:"orange" , 
+                width: 45 , height:45 ,
+                 borderRadius:40 ,
+                 marginBottom:25,
+                 marginLeft:30,
+                 justifyContent: 'center',
+                 alignItems:'center'
+           }}
+             onPress={() => updateTag(record , "orange")}
+              >
+          </TouchableOpacity>
+         </View>
+            <View style={{flexDirection:'row' , justifyContent:'center'}}>
+              <TouchableOpacity 
+            style={{
+                backgroundColor:"yellow" , 
+                width: 45 , height:45 ,
+                 borderRadius:40 ,
+                 marginBottom:25,
+                 justifyContent: 'center',
+                 alignItems:'center'
+           }}
+             onPress={() => updateTag(record , "yellow")}
+              >
+          </TouchableOpacity>
+
+          <TouchableOpacity 
+            style={{
+                backgroundColor:"green" , 
+                width: 45 , height:45 ,
+                 borderRadius:40 ,
+                 marginBottom:25,
+                 marginLeft:30,
+                 justifyContent: 'center',
+                 alignItems:'center'
+           }}
+             onPress={() => updateTag(record , "green")}
+              >
+          </TouchableOpacity>
+         </View>
+           
+          <View style={{flexDirection:'row' , justifyContent:'center'}}>
+              <TouchableOpacity 
+            style={{
+                backgroundColor:"lightblue" , 
+                width: 45 , height:45 ,
+                 borderRadius:40 ,
+                 marginBottom:25,
+                 justifyContent: 'center',
+                 alignItems:'center'
+           }}
+             onPress={() => updateTag(record , "lightblue")}
+              >
+          </TouchableOpacity>
+          <Text style={{fontSize: 20 , fontWeight: 'bold' ,justifyContent:'center', marginBottom:20}}></Text>
+          </View>
+
+
+          <TouchableOpacity 
+            style={{
+                backgroundColor:"red" , 
+                width: 100 , height:30,
+                 borderRadius:15 ,
+                 marginBottom:20,
+                 justifyContent: 'center',
+                 alignItems:'center'
+           }}
+             onPress={() => setOrderState(false)}
+              >
+                  
+            <Text style={{color:"#ffff" , fontSize:15}}>Close</Text>
+          </TouchableOpacity>
+
+          <Text style={{backgroundColor:"red" , color:"#fff"}}>Red: Delivered / Not Paid </Text>
+          <Text style={{backgroundColor:"orange" , color:"#fff"}}>Orange: Not Delivered / Not Paid / Available  </Text>
+          <Text style={{backgroundColor:"yellow" , color:"#fff"}}>Yellow: Not Delivered / Paid / Not Available /</Text>
+          <Text style={{backgroundColor:"green" , color:"#fff"}}>Green: Not Delivered / Paid / Available </Text>
+          
+          </View>
+        
+          </View>
+
+            </Modal>
+            </View>
 
         </View>
     )
@@ -428,6 +783,30 @@ const styles = StyleSheet.create({
          marginBottom:10
          
         },
+
+        TextInputStyle:{
+ 
+          // Setting up Hint Align center.
+          textAlign: 'center',
+           
+          // Setting up TextInput height as 50 pixel.
+          height: 30,
+           
+          // Set border width.
+           borderWidth: 2,
+           
+           // Set border Hex Color Code Here.
+           borderColor: '#FF5722',
+           
+           width:200,
+          // Set border Radius.
+           borderRadius: 10 ,
+           
+          //Set background color of Text Input.
+           backgroundColor : "#FFFFFF",
+           marginBottom:10
+           
+          },
     modalView: {
       margin: 20,
       backgroundColor: "white",

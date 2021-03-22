@@ -69,6 +69,8 @@ export const pickShirt =(color , font ,design) =>{
         case "Rooted":
             code = code + rooted;
             break;
+        case "Prayer":
+            return require("../assets/image/prayer.jpg")
         default:
             return require("../assets/image/custom.jpg")
     }
@@ -94,6 +96,7 @@ export const pickShirt =(color , font ,design) =>{
             break;
         case "Yellow":
             code = code + shirtYellow;
+            break
         default:
             return require("../assets/image/custom.jpg")
     }
@@ -218,28 +221,19 @@ export default function Home({navigation}) {
     const responseListener = useRef();
 
     useEffect(() => {
-        registerForPushNotificationsAsync().then(token => setExpoPushToken(token));
-    
-        // This listener is fired whenever a notification is received while the app is foregrounded
-        notificationListener.current = Notifications.addNotificationReceivedListener(notification => {
-          setNotification(notification);
-        });
-    
-        // This listener is fired whenever a user taps on or interacts with a notification (works when app is foregrounded, backgrounded, or killed)
-        responseListener.current = Notifications.addNotificationResponseReceivedListener(response => {
-          console.log(response);
-        });
-    
-        return () => {
-          Notifications.removeNotificationSubscription(notificationListener.current);
-          Notifications.removeNotificationSubscription(responseListener.current);
-        };
-      }, []);
+        const unsubscribe = navigation.addListener('focus', () => {
+            // The screen is focused
+           updateDatabase()
+          });
+
+          return unsubscribe;
+      }, [navigation]);
   
   
 
     var orderss =[];
     const [ordersRef , setOrdersRef] = useState(firebase.database().ref("/Orders"))
+   
     const batchRef =firebase.database().ref("/Batch")
     ordersRef.once('value' , function(snapshot){
       
@@ -247,12 +241,13 @@ export default function Home({navigation}) {
           var key =  element.key;
           var data = element.val();
     
-          orderss.push({key:key, agent: data.Agent, quantity:data.Quanitity , buyer: data.Buyer ,color: data.Color ,design:data.Design , size: data.Size , font: data.Font})
+          orderss.push({key:key,tag:data.Tag, agent: data.Agent, quantity:data.Quanitity , buyer: data.Buyer ,color: data.Color ,design:data.Design , size: data.Size , font: data.Font})
         });
     })
    
 
     const [DATA , setData] = useState(orders)
+  
 
 
 
@@ -280,6 +275,7 @@ export default function Home({navigation}) {
     const [batch4 , setBatch4]= useState("")
     const [batchError , setBatchError] = useState("")
     const [batchVisible , setBatchVisible] = useState(false)
+    const [orderState , setOrderState] = useState(false)
     
     const setToZero =()=>{
         setColor("0")
@@ -324,6 +320,9 @@ export default function Home({navigation}) {
 
     }
 
+   
+
+
     function updateDatabase() {
 
         var orders =[]
@@ -335,12 +334,31 @@ export default function Home({navigation}) {
               var key =  element.key;
               var data = element.val();
         
-              orders.push({key:key, agent: data.Agent,delivery:data.Delivery ,  batch:data.Batch , quantity:data.Quanitity , buyer: data.Buyer ,color: data.Color ,design:data.Design , size: data.Size , font: data.Font})
+              orders.push({key:key,tag:data.Tag, agent: data.Agent,delivery:data.Delivery ,  batch:data.Batch , quantity:data.Quanitity , buyer: data.Buyer ,color: data.Color ,design:data.Design , size: data.Size , font: data.Font})
+            });
+        })
+        .then(()=> setData(orders))
+        .then(() => diOrder=orders)
+        
+    }
+
+
+    function updateDatabase2() {
+
+        var orders =[]
+        setOrdersRef(firebase.database().ref("/Orders"))
+
+        ordersRef.once('value' , function(snapshot){
+      
+            snapshot.forEach(element => {
+              var key =  element.key;
+              var data = element.val();
+        
+              orders.push({key:key,tag:data.Tag, agent: data.Agent,delivery:data.Delivery ,  batch:data.Batch , quantity:data.Quanitity , buyer: data.Buyer ,color: data.Color ,design:data.Design , size: data.Size , font: data.Font})
             });
         })
 
-        setData(orders)
-        diOrder = orders
+      return orders
         
     }
 
@@ -446,7 +464,8 @@ export default function Home({navigation}) {
             Quanitity: parseInt(quantity),
             Size: size,
             Batch: 2,
-            Delivery: deliveryDate
+            Delivery: deliveryDate ,
+            Tag: "lightblue"
 
         })
         .then(()=>updateDatabase())
@@ -1015,6 +1034,51 @@ export default function Home({navigation}) {
             </Modal>
             </View>
 
+{/**Order Tag */}
+
+<View style={styles.centeredView}>
+           <Modal
+                visible= {orderState}
+                transparent={true}
+
+            >
+
+              <View style={styles.centeredView}>
+                <View style={styles.modalView}>
+
+              <Text style={{fontSize: 25 , fontWeight: 'bold' , marginBottom:20}}>Tag description</Text>
+        
+
+          <Text style={{backgroundColor:"red" , color:"#fff"}}>RED: Delivered / Not Paid </Text>
+          <Text style={{backgroundColor:"orange" , color:"#fff"}}>ORANGE: Not Delivered / Not Paid / Available  </Text>
+          <Text style={{backgroundColor:"yellow" , color:"#fff"}}>YELLOW: Not Delivered / Paid / Not Available /</Text>
+          <Text style={{backgroundColor:"green" , color:"#fff"}}>GREEN: Not Delivered / Paid / Available </Text>
+          
+          <Text style={{backgroundColor:"lightblue" , color:"#fff"}}>LIGHTBLUE: Not Delivered / Not Paid / Not Available </Text>
+          
+          <TouchableOpacity 
+            style={{
+                backgroundColor:"red" , 
+                width: 100 , height:30,
+                 borderRadius:15 ,
+                 marginBottom:20,
+                 marginTop:20,
+                 justifyContent: 'center',
+                 alignItems:'center'
+           }}
+             onPress={() => setOrderState(false)}
+              >
+                  
+            <Text style={{color:"#ffff" , fontSize:15}}>Close</Text>
+          </TouchableOpacity>
+          </View>
+        
+          </View>
+
+            </Modal>
+            </View>
+
+
 
             <Image
                 source={require("../assets/image/worshipp.jpg")}
@@ -1082,7 +1146,7 @@ export default function Home({navigation}) {
           </View>
           </View>
 
-          { admin ?   <View style={styles.centeredView}>
+          { admin ?   <View style={styles.centeredView , {flexDirection:'row'} }>
           <TouchableOpacity 
             style={{
                 width: 200 , height:50 ,
@@ -1095,10 +1159,45 @@ export default function Home({navigation}) {
                   
             <Text style={{color:"#ffff" , fontSize:15}}>Admin </Text>
           </TouchableOpacity>
+
+          <TouchableOpacity 
+            style={{
+                width: 200 , height:50 ,
+                 borderRadius:15 ,
+                 alignItems:'center'
+               
+           }}
+             onPress={() => navigation.navigate("Promotion")}
+              >
+                  
+            <Text style={{color:"#ffff" , fontSize:15}}>Promotion </Text>
+          </TouchableOpacity>
+          
           </View>
           
-         : <View></View>}
+         : <View>
+                 <TouchableOpacity 
+            style={{
+                width: 200 , height:50 ,
+                 borderRadius:15 ,
+                 alignItems:'center'
+               
+           }}
+             onPress={() => navigation.navigate("Promotion")}
+              >
+                  
+            <Text style={{color:"#ffff" , fontSize:15}}>Promotion </Text>
+          </TouchableOpacity>
+             
+             </View>}
 
+
+    
+
+
+
+    
+            {/**Purchase Orders */}
             <Animated.FlatList
                 onScroll ={Animated.event(
                     [{nativeEvent: {contentOffset:{y:scrollY}}}],
@@ -1190,11 +1289,29 @@ export default function Home({navigation}) {
                         resizeMode="contain"
                        />
                         <View>
-                            <Text style={{fontSize:22 , fontWeight:'700'}}>{item.buyer}</Text>
-                            <Text style={{fontSize:18 , opacity: 0.7}}>Size: {item.size}</Text>
-                            <View style={{flexDirection:'row'}}>
-                                <Text style={{fontSize:12, opacity:0.8 , color:'#E318F3'}}>Design: {item.design}{'     '}</Text>
-                                <Text style={{fontSize:12, opacity:0.8 , color:'#E318F3'}}>{'  '}Font: {item.font}</Text>
+                        <View style={{flexDirection:'row' , justifyContent: 'space-between'}}>
+                            <Text style={{fontSize:22 , fontWeight:'700' }}>{item.buyer}</Text>
+                            <TouchableOpacity
+                              style={{
+                                width:50,
+                                height:25,
+                                backgroundColor:item.tag,
+                                borderRadius:0
+                              }}
+
+                              onPress={()=> setOrderState(true)}
+                            >
+
+
+                            </TouchableOpacity>
+                            </View>
+                             <View style={{flexDirection:'row' , justifyContent: 'space-between' , marginTop:5}}>
+                            <Text style={{fontSize:15 , opacity: 0.7}}>Size: <Text style={{fontWeight: 'bold'}}>{item.size}</Text></Text>
+                           { admin ? <Text style={{fontSize:15 , opacity: 0.7}}>{'   '}Agent: <Text style={{fontWeight: 'bold'}}> {item.agent}</Text></Text>:<View></View>}
+                            </View>
+                            <View style={{flexDirection:'row' , marginTop:5}}>
+                                <Text style={{fontSize:12, opacity:0.8 , color:'#ff33c1'}}>Design: {item.design}</Text>
+                                <Text style={{fontSize:12, opacity:0.8 , color:'#ff33c1'}}>{'  '}Font: {item.font}</Text>
                             </View>
                             
                            

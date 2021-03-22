@@ -35,12 +35,17 @@ const salesRef = firebase.database().ref("/Sales");
 
 
 ordersRef.once('value' , function(snapshot){
+
   
     snapshot.forEach(element => {
+      var tagg = "lightblue";
       var key =  element.key;
       var data = element.val();
 
-      orders.push({key:key, agent: data.Agent, batch:data.Batch , quantity:data.Quanitity , buyer: data.Buyer ,color: data.Color ,design:data.Design , size: data.Size , font: data.Font})
+  
+   
+
+      orders.push({key:key, agent: data.Agent, tag:data.Tag,  batch:data.Batch , quantity:data.Quanitity , buyer: data.Buyer ,color: data.Color ,design:data.Design , size: data.Size , font: data.Font})
     });
 })
 
@@ -73,7 +78,7 @@ export const firebaseData = () =>{
 
 export function SignIn({navigation}) {
 
-    const [user , setUser] = useState("paulssie.cp@gmail.com")
+    const [user , setUser] = useState("ksekwamote@gmail.com")
     const [pass , setPass] = useState("")
     const [password , showPassword] = useState(false)
 
@@ -130,6 +135,7 @@ export function SignIn({navigation}) {
 
     function loginUser(email , password) {
 
+      
         firebase.auth().setPersistence(firebase.auth.Auth.Persistence.NONE)
           .then(()=>{
 
@@ -139,11 +145,6 @@ export function SignIn({navigation}) {
           .then((res) => navigation.navigate("Home"))
           .catch(err => alert("Password or Email is incorrect")) 
           
-          
-
-           
-
-
     }
 
     return (

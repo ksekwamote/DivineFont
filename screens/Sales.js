@@ -1,4 +1,4 @@
-import React , {useState} from 'react'
+import React , {useState , useEffect} from 'react'
 import { StatusBar, FlatList, Picker, Modal ,Image, Animated, Text, View, Dimensions, StyleSheet, TouchableOpacity, Easing, SafeAreaViewBase, SafeAreaView, SnapshotViewIOS, Pressable, TextInput, Alert } from 'react-native';
 import {sales} from "./Home"
 import {theAdmin , username} from "./SignIn"
@@ -47,20 +47,41 @@ const ITEM_SIZE = AVATAR_SIZE + SPACING*3
 
 
 
-
     const [salesRef , setSalesRef] = useState(firebase.database().ref("/Sales"))
     const [ordersRef , setOrdersRef] = useState(firebase.database().ref("/Orders"))
     const scrollY = React.useRef(new Animated.Value(0)).current
+
     
-    salesRef.once('value' , function(snapshot){
+    useEffect(() => {
+      const unsubscribe = navigation.addListener('focus', () => {
+          // The screen is focused
+          updateSalesDatabase()
+        });
+
+        return unsubscribe;
+    }, [navigation]);
+
+
+
+    function updateSalesDatabase(){
+
+      var theSales =[]
+
+      salesRef.once('value' , function(snapshot){
       
         snapshot.forEach(element => {
           var key =  element.key;
           var data = element.val();
     
-          orderss.push({key:key, agent: data.Agent, quantity:data.Quanitity , buyer: data.Buyer ,color: data.Color ,design:data.Design , size: data.Size , font: data.Font})
-        });
+          theSales.push({key:key, agent: data.Agent, quantity:data.Quanitity , buyer: data.Buyer ,color: data.Color ,design:data.Design , size: data.Size , font: data.Font})
+        })
     })
+    .then(()=>  setData(theSales) )
+
+
+    }
+    
+    
    
     const [DATA , setData] = useState(sales)
 
@@ -212,11 +233,8 @@ const ITEM_SIZE = AVATAR_SIZE + SPACING*3
                        />
                         <View>
                             <Text style={{fontSize:22 , fontWeight:'700'}}>{item.buyer}</Text>
-                            <Text style={{fontSize:14 , opacity: 0.7}}>Keys: {item.key}</Text>
-                            <View style={{flexDirection:'row'}}>
-                                <Text style={{fontSize:12, opacity:0.8 , color:'#0099cc'}}>{item.design}</Text>
-                                <Text style={{fontSize:12, opacity:0.8 , color:'#0099cc'}}>{'  '}Fonts: {item.font}</Text>
-                            </View>
+                            <Text style={{fontSize:14 , opacity: 0.7}}>Agent: {item.agent}</Text>
+                           
                             
                            
                         </View>
@@ -257,7 +275,7 @@ const ITEM_SIZE = AVATAR_SIZE + SPACING*3
                          />
                           <View>
                               <Text style={{fontSize:22 , fontWeight:'700'}}>{item.buyer}</Text>
-                              <Text style={{fontSize:14 , opacity: 0.7}}>Keys: {item.key}</Text>
+                              <Text style={{fontSize:14 , opacity: 0.7}}>Size: <Text style={{fontWeight: 'bold'}}>{item.size}</Text></Text>
                               <View style={{flexDirection:'row'}}>
                                   <Text style={{fontSize:12, opacity:0.8 , color:'#0099cc'}}>{item.design}</Text>
                                   <Text style={{fontSize:12, opacity:0.8 , color:'#0099cc'}}>{'  '}Fonts: {item.font}</Text>
