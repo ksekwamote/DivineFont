@@ -1,6 +1,6 @@
 
 import React, { useState  , useRef , useEffect} from 'react'
-import { StatusBar,Platform , FlatList, Picker, Modal ,Image, Animated, Text, View, Dimensions, StyleSheet, TouchableOpacity, Easing, SafeAreaViewBase, SafeAreaView, SnapshotViewIOS, Pressable, TextInput, Alert } from 'react-native';
+import { StatusBar,Platform , FlatList, Picker,BackHandler, Modal ,Image, Animated, Text, View, Dimensions, StyleSheet, TouchableOpacity, Easing, SafeAreaViewBase, SafeAreaView, SnapshotViewIOS, Pressable, TextInput, Alert } from 'react-native';
 const { width, height } = Dimensions.get('screen');
 import faker from 'faker'
 import Constants from 'expo-constants';
@@ -228,6 +228,13 @@ export default function Home({navigation}) {
 
           return unsubscribe;
       }, [navigation]);
+
+      
+    useEffect(() => {
+        BackHandler.addEventListener('hardwareBackPress', () => true)
+        return () =>
+          BackHandler.removeEventListener('hardwareBackPress', () => true)
+      }, [])
   
   
 
@@ -265,10 +272,11 @@ export default function Home({navigation}) {
     const [quantity, setQuantity] = useState("0")
     const [size , setSize] = useState("0")
     const [buyer , setBuyer] = useState("0")
+    const [cell , setCell] = useState("0")
     const [error, setError] = useState("")
     const [back , setBack] = useState("")
     const [backVisible , setBackVisible]= useState(false)
-    const [deliveryDate , setDeliveryDate]= useState("2021-03-05")
+    const [deliveryDate , setDeliveryDate]= useState(new Date().toJSON().slice(0,10).replace(/-/g,'-'))
     const [batch1 , setBatch1]= useState("")
     const [batch2 , setBatch2]= useState("")
     const [batch3 , setBatch3]= useState("")
@@ -276,13 +284,15 @@ export default function Home({navigation}) {
     const [batchError , setBatchError] = useState("")
     const [batchVisible , setBatchVisible] = useState(false)
     const [orderState , setOrderState] = useState(false)
-    
+    const [socialVisible , setSocialVisible] = useState(false)
+
     const setToZero =()=>{
         setColor("0")
         setDesign("0")
         setFontColor("0")
         setQuantity("0")
         setSize("0")
+        setCell("0")
         setError("")
         
     }
@@ -334,11 +344,13 @@ export default function Home({navigation}) {
               var key =  element.key;
               var data = element.val();
         
-              orders.push({key:key,tag:data.Tag, agent: data.Agent,delivery:data.Delivery ,  batch:data.Batch , quantity:data.Quanitity , buyer: data.Buyer ,color: data.Color ,design:data.Design , size: data.Size , font: data.Font})
+
+              orders.push({key:key,tag:data.Tag, cell: data.Cell!=undefined ? data.Cell: ""  ,agent: data.Agent,delivery:data.Delivery ,  batch:data.Batch , quantity:data.Quanitity , buyer: data.Buyer ,color: data.Color ,design:data.Design , size: data.Size , font: data.Font})
             });
         })
         .then(()=> setData(orders))
         .then(() => diOrder=orders)
+      
         
     }
 
@@ -479,6 +491,49 @@ export default function Home({navigation}) {
             { cancelable: false }
           ))
         .then(() => purchaseInvisible())
+        .then(() => setToZero())
+  
+       
+    }
+     
+ }
+
+ function socialOrder() {
+
+    if (color=="0" || cell=="0" || buyer==""|| design=="0" || fontColor=="0" || quantity=="0" || size=="0" ){
+
+        setError("Fill out all Required Fields")
+    }
+    else{
+       
+        setError("")
+
+        ordersRef.push({
+            Agent:"Social",
+            Buyer: buyer ,
+            Color: color,
+            Design:design,
+            Font: fontColor,
+            Quanitity: parseInt(quantity),
+            Size: size,
+            Cell: cell,
+            Batch: 2,
+            Delivery: deliveryDate ,
+            Tag: "lightblue"
+
+        })
+        .then(()=>updateDatabase())
+        .then(() => Alert.alert(
+            'Social Order has been made',
+            `${buyer.trim()}'s order has been created`,
+            [
+              {text: 'Cancel', onPress: () => console.log('Cancel Pressed!')},
+              {text: 'OK', onPress: ()=> console.log("")}
+            ],
+            { cancelable: false }
+          ))
+        .then(() => purchaseInvisible())
+        .then(() => setToZero())
   
        
     }
@@ -495,7 +550,6 @@ export default function Home({navigation}) {
     else{
         setError("")
         ordersRef.child(record.key).update({
-            Agent:"Kutlo" ,
             Buyer: buyer ,
             Color: color,
             Design:design,
@@ -662,6 +716,14 @@ export default function Home({navigation}) {
     const updateInvisible =() =>{
         setUpdatePurchase(!updatePurchase)
         setToZero()
+    }
+
+    function signOut(){
+        firebase.auth().signOut().then(() => {
+           navigation.navigate("SignIn")
+          }).catch((error) => {
+            // An error happened.
+          });
     }
 
 
@@ -890,6 +952,181 @@ export default function Home({navigation}) {
             </Modal>
             </View>
 
+            <View style={styles.centeredView}>
+            <Modal
+            animationType="slide"
+            transparent={true}
+            visible={socialVisible}
+            onRequestClose={()=>{
+                setPurchaseVisible(!socialVisible)
+            }}
+            >
+                <View style={styles.centeredView}>
+                    <View style={styles.modalView}>
+
+                        <Text style={{fontWeight:'bold' , fontSize:20}}> Social Media Order</Text>
+
+                           
+                            
+
+     <Picker
+        style={styles.picker}
+        selectedValue={color}
+        onValueChange={col=>setColor(col)}
+        mode="dropdown"
+        itemStyle={styles.itemStyle}>
+            <Picker.Item label="Select Tshirt Color" value="0" />
+            <Picker.Item label="White" value="White" />
+            <Picker.Item label="Black" value="Black" />
+            <Picker.Item label="Navy Blue" value="Navy" />
+            <Picker.Item label="Grey" value="Grey" />
+            <Picker.Item label="Maroon" value="Maroon" />
+            <Picker.Item label="Yellow" value="Yellow" />
+    </Picker>
+
+    <Picker
+        style={styles.picker}
+        mode="dropdown"
+        selectedValue={design}
+        onValueChange={des=>setDesign(des)}
+        itemStyle={styles.itemStyle}>
+            <Picker.Item label="Select Design" value="0" />
+            <Picker.Item label="Jesus" value="Jesus" />
+            <Picker.Item label="Rooted in Christ" value="Rooted" />
+            <Picker.Item label="Keyboard" value="Keys" />
+    </Picker>
+
+    <Picker
+        style={styles.picker}
+        mode="dropdown"
+        selectedValue={fontColor}
+        onValueChange={col=>setFontColor(col)}
+        itemStyle={styles.itemStyle}>
+            <Picker.Item label="Select Font Color" value="0" />
+            <Picker.Item label="White" value="White" />
+            <Picker.Item label="Black" value="Black" />
+            <Picker.Item label="Gold" value="Gold" />
+    </Picker>
+
+    <View></View>
+
+    <Picker
+        style={styles.picker}
+        mode="dropdown"
+        selectedValue={quantity}
+        onValueChange={qua=>setQuantity(qua)}
+        itemStyle={styles.itemStyle}>
+            <Picker.Item label="Select Quantity" value="0" />
+            <Picker.Item label="1" value="1" />
+            <Picker.Item label="2" value="2" />
+            <Picker.Item label="3" value="3" />
+            <Picker.Item label="4" value="4" />
+            <Picker.Item label="5" value="5" />
+            <Picker.Item label="6" value="6" />
+            <Picker.Item label="7" value="7" />
+            <Picker.Item label="8" value="8" />
+            <Picker.Item label="9" value="9" />
+            <Picker.Item label="10" value="10" />
+    </Picker>
+
+    <Picker
+        style={styles.picker}
+        mode="dropdown"
+        selectedValue={size}
+        onValueChange={val=>setSize(val)}
+        itemStyle={styles.itemStyle}>
+            <Picker.Item label="Select Size" value="0" />
+            <Picker.Item label="Extra Small" value="XS" />
+            <Picker.Item label="Small" value="S" />
+            <Picker.Item label="Medium" value="M" />
+            <Picker.Item label="Larger" value="L" />
+            <Picker.Item label="Extra Large" value="XL" />
+            <Picker.Item label="XX Larger" value="XXL" />
+            <Picker.Item label="6" value="6" />
+            <Picker.Item label="7" value="7" />
+            <Picker.Item label="8" value="8" />
+            <Picker.Item label="9" value="9" />
+            <Picker.Item label="10" value="10" />
+            <Picker.Item label="11" value="11" />
+            <Picker.Item label="12" value="12" />
+    </Picker>
+
+            
+      
+
+    <TextInput
+                                placeholder="Name of Buyer"
+                                underlineColorAndroid="transparent"
+                                style={styles.TextInputStyleClass}
+                                onChangeText ={(event)=> setBuyer(event)}
+                                
+                            ></TextInput>
+
+<TextInput
+                                placeholder="Cell of Buyer"
+                                underlineColorAndroid="transparent"
+                                style={styles.TextInputStyleClass}
+                                onChangeText ={(event)=> setCell(event)}
+                                
+                            ></TextInput>      
+                            <Text></Text>
+
+<Text>Date of Delivery: </Text>
+    <DatePicker
+        style={{width: 150}}
+        date={deliveryDate}
+        mode="date"
+        placeholder="select date"
+        format="YYYY-MM-DD"
+        minDate="2021-03-01"
+        maxDate="2022-06-01"
+        confirmBtnText="Confirm"
+        cancelBtnText="Cancel"
+        customStyles={{
+          dateIcon: {
+            position: 'absolute',
+            left: 0,
+            top: 4,
+            marginLeft: 0
+          },
+          dateInput: {
+            marginLeft: 36
+          }
+          // ... You can check the source to find the other keys.
+        }}
+       onDateChange={(date) => setDeliveryDate(date)}
+      />
+                                
+                        
+                        
+                                    <Text style={{color:"#00ff00" ,backgroundColor:"#ff0000"}}>{error}</Text>
+                            <View style={{flexDirection:'row'}}>
+
+                         
+                        <Pressable
+                         style={[styles.button , styles.buttonOpen]}
+                        onPress={()=> setSocialVisible(false) }
+                        >
+                            <Text style={styles.textStyle}>Close</Text>
+                        </Pressable>
+
+                        <Pressable
+                         style={[styles.button , styles.buttonClose]}
+                        onPress={()=> socialOrder()}
+                        >
+                            <Text style={styles.textStyle}>Order</Text>
+                        </Pressable>
+
+                        </View>
+
+                    </View>
+
+                </View>
+
+
+            </Modal>
+            </View>
+
 
 {/**UPDATE PURCHASE */}
             
@@ -1095,22 +1332,9 @@ export default function Home({navigation}) {
             <View style={{
       justifyContent:'space-around',
       alignItems: "center",
-      flexDirection:'row' , marginTop:-40 }}>
+      flexDirection:'row' , marginTop:-100 }}>
 
-          
-           <View>
-        <TouchableOpacity style={{
-             backgroundColor:"#33AAFF" , 
-             width: 50, height:50 ,
-              borderRadius:15 ,
-              marginBottom:20,
         
-              }}
-             onPress={() => navigation.navigate("SignIn")}
-              >
-            <Image source={require("../assets/icons/exit.png")} />
-          </TouchableOpacity>
-          </View>
 
                
               <View>
@@ -1119,7 +1343,7 @@ export default function Home({navigation}) {
                 backgroundColor:"#33AAFF" , 
                 width: 200 , height:50 ,
                  borderRadius:15 ,
-                 marginBottom:20,
+                 marginBottom:10,
                  justifyContent: 'center',
                  alignItems:'center'
            }}
@@ -1129,73 +1353,9 @@ export default function Home({navigation}) {
             <Text style={{color:"#ffff" , fontSize:15}}>Make Purchase Order </Text>
           </TouchableOpacity>
           </View>
+          </View>
+
         
-      
-
-
-           <View>
-            <TouchableOpacity style={{
-             width:50  , height:50 ,
-              borderRadius:15 ,
-              marginBottom:20,
-              }}
-             onPress={() => navigateToSales()}
-              >
-          <Image source={require("../assets/icons/sales.png")} />
-          </TouchableOpacity>
-          </View>
-          </View>
-
-          { admin ?   <View style={styles.centeredView , {flexDirection:'row'} }>
-          <TouchableOpacity 
-            style={{
-                width: 200 , height:50 ,
-                 borderRadius:15 ,
-                 alignItems:'center'
-               
-           }}
-             onPress={() => navigation.navigate("Admin")}
-              >
-                  
-            <Text style={{color:"#ffff" , fontSize:15}}>Admin </Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity 
-            style={{
-                width: 200 , height:50 ,
-                 borderRadius:15 ,
-                 alignItems:'center'
-               
-           }}
-             onPress={() => navigation.navigate("Promotion")}
-              >
-                  
-            <Text style={{color:"#ffff" , fontSize:15}}>Promotion </Text>
-          </TouchableOpacity>
-          
-          </View>
-          
-         : <View>
-                 <TouchableOpacity 
-            style={{
-                width: 200 , height:50 ,
-                 borderRadius:15 ,
-                 alignItems:'center'
-               
-           }}
-             onPress={() => navigation.navigate("Promotion")}
-              >
-                  
-            <Text style={{color:"#ffff" , fontSize:15}}>Promotion </Text>
-          </TouchableOpacity>
-             
-             </View>}
-
-
-    
-
-
-
     
             {/**Purchase Orders */}
             <Animated.FlatList
@@ -1280,7 +1440,7 @@ export default function Home({navigation}) {
                                 }
                             ]
                     }>
-                    <View style={{flexDirection:'row' ,padding: SPACING , marginBottom:SPACING , backgroundColor: "rgba(255,255,240, .7)" , borderRadius:12 ,
+                    <View style={{flexDirection:'row' ,padding: item.agent=="Social" ?  SPACING-10: SPACING , marginBottom:SPACING , backgroundColor: item.agent =="Social" ? "lightblue":"rgba(255,255,240, .7)" , borderRadius:12 ,
                     
                     
                     }}>
@@ -1291,7 +1451,7 @@ export default function Home({navigation}) {
                         <View>
                         <View style={{flexDirection:'row' , justifyContent: 'space-between'}}>
                             <Text style={{fontSize:22 , fontWeight:'700' }}>{item.buyer}</Text>
-                            <TouchableOpacity
+                            {item.tag!="lightblue" ? <TouchableOpacity
                               style={{
                                 width:50,
                                 height:25,
@@ -1303,7 +1463,7 @@ export default function Home({navigation}) {
                             >
 
 
-                            </TouchableOpacity>
+                            </TouchableOpacity>: <Text></Text>}
                             </View>
                              <View style={{flexDirection:'row' , justifyContent: 'space-between' , marginTop:5}}>
                             <Text style={{fontSize:15 , opacity: 0.7}}>Size: <Text style={{fontWeight: 'bold'}}>{item.size}</Text></Text>
@@ -1313,6 +1473,7 @@ export default function Home({navigation}) {
                                 <Text style={{fontSize:12, opacity:0.8 , color:'#ff33c1'}}>Design: {item.design}</Text>
                                 <Text style={{fontSize:12, opacity:0.8 , color:'#ff33c1'}}>{'  '}Font: {item.font}</Text>
                             </View>
+                            {item.agent=="Social" ?  <Text style={{fontSize:12, opacity:0.8 , color:'#ff33c1'}}>{item.cell}</Text>:<Text></Text> }
                             
                            
                         </View>

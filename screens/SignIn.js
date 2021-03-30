@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState , useEffect } from 'react';
 import { Image, Picker, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import * as firebase from "firebase"
 
@@ -31,10 +31,11 @@ const salesRef = firebase.database().ref("/Sales");
   var orders =[];
   var sales =[];
   var username ="user";
+  var email = "";
   var theAdmin = false;
 
 
-ordersRef.once('value' , function(snapshot){
+ordersRef.on('value' , function(snapshot){
 
   
     snapshot.forEach(element => {
@@ -129,14 +130,13 @@ export function SignIn({navigation}) {
     // console.log("User Level: "+emails+"   Admin: "+getAdmin(emails))
        username = getUsername(emails)
        theAdmin = getAdmin(emails)
+       email = emails
    }
 
 
 
     function loginUser(email , password) {
-
-      
-        firebase.auth().setPersistence(firebase.auth.Auth.Persistence.NONE)
+        firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL)
           .then(()=>{
 
            return firebase.auth().signInWithEmailAndPassword(email , password)
@@ -147,13 +147,40 @@ export function SignIn({navigation}) {
           
     }
 
+    
+    useEffect(() => {
+      const unlisten = firebase.auth().onAuthStateChanged(user => {
+        var userC = firebase.auth().currentUser;
+         if (user){
+          console.log(`This user is logged in:  ${userC.email}`)
+          getAdminUser(userC.email)
+          navigation.navigate("Home")
+         }
+        },
+      );
+
+      return () => {
+
+       unlisten();
+       
+      }
+
+    }); 
+
+
+
+
+
+
+  
+
     return (
         <View style={styles.container}>
-
+         
                
 
         <View style={{top: -80}}>
-        <Image style={{height:200 , width:200}} source={require("../assets/image/halo.png")} />
+        <Image style={{height:200 , width:300}} source={require("../assets/image/halo.png")} />
        
         </View>
     
@@ -229,6 +256,7 @@ export function SignIn({navigation}) {
         </View>
     )
 }
+
 
 const styles = StyleSheet.create({
     container: {

@@ -117,6 +117,15 @@ export default function Admin({navigation}) {
         const ordersRef = firebase.database().ref("/Orders")
         const scrollY = React.useRef(new Animated.Value(0)).current
 
+        useEffect(() => {
+          const unsubscribe = navigation.addListener('focus', () => {
+              // The screen is focused
+             updateDatabase()
+            });
+  
+            return unsubscribe;
+        }, [navigation]);
+
         function updateBatch(item , num){
 
             ordersRef.child(item.key).update( {
@@ -160,9 +169,6 @@ export default function Admin({navigation}) {
         function updateDatabase() {
 
           var orderss =[]
-          //setOrdersRef(firebase.database().ref("/Orders"))
-      //  const ordersRefs= ;
-
   
       firebase.database().ref("/Orders").once('value' , function(snapshot){
         
@@ -436,7 +442,7 @@ export default function Admin({navigation}) {
                            <Text style={{fontSize:15 , opacity: 0.7}}>{'   '}Agent: <Text style={{fontWeight: 'bold'}}> {item.agent}</Text></Text>
                             </View>
                             <View style={{flexDirection:'row'}}>
-                                <Text style={{fontSize:12, opacity:0.8 , color:'#E318F3'}}>Design: {item.design}{'     '}</Text>
+                                <Text style={{fontSize:12, opacity:0.8 , color:'#E318F3'}}>Batch {item.batch}{'     '}</Text>
                                 <Text style={{fontSize:12, opacity:0.8 , color:'#E318F3'}}>{'  '}Fonts: {item.font}</Text>
                             </View>
                             
@@ -568,12 +574,13 @@ export default function Admin({navigation}) {
               <Text style={{fontSize:20}}>Cassie:  {totalSales("Cassie")}</Text>
               <Text style={{fontSize:20}}>Portia:  {totalSales("Portia")}</Text>
               <Text style={{fontSize:20}}>Phaladi:  {totalSales("Phaladi")}</Text>
-              <Text style={{fontSize:20}}>Mooketsi:  {totalSales("Mooketsi")}</Text>
               <Text style={{fontSize:20}}>Wame:  {totalSales("Wame")}</Text>
               <Text style={{fontSize:20}}>Master:  {totalSales("Master")}</Text>
-              <Text style={{fontSize:20}}>Dimpho:  {totalSales("Lolo")}</Text>
-              <Text style={{fontSize:20}}>Faith:  {totalSales("Fatih")}</Text>
+              <Text style={{fontSize:20}}>Dimpho:  {totalSales("Dimpho")}</Text>
+              <Text style={{fontSize:20}}>Faith:  {totalSales("Faith")}</Text>
+              <Text style={{fontSize:20}}>Mooketsi:  {totalSales("Mooketsi")}</Text>
               <Text style={{fontSize:20}}>Nelly:  {totalSales("Nelly")}</Text>
+              <Text style={{fontSize:20}}>Lolo:  {totalSales("Lolo")}</Text>
               <Text style={{fontSize:25 , fontWeight: 'bold'}}>TOTAL:  {sales.length}</Text>
               
             

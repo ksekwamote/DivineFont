@@ -199,7 +199,7 @@ const SPACING = 20;
 const AVATAR_SIZE = 70;
 const ITEM_SIZE = AVATAR_SIZE + SPACING*3;
 
-export default function Promotion({navigation}) {
+export default function Social({navigation}) {
 
     
     const [expoPushToken, setExpoPushToken] = useState('');
@@ -385,9 +385,9 @@ export default function Promotion({navigation}) {
 
 
             <Image
-                source={require("../assets/image/promo.jpg")}
+                source={require("../assets/image/green.jpg")}
                 style={StyleSheet.absoluteFillObject}
-                blurRadius={50}
+                blurRadius={0}
             />
         <View style={styles.centeredView}>
       
@@ -425,17 +425,17 @@ export default function Promotion({navigation}) {
           <View>
           <TouchableOpacity 
             style={{
-                backgroundColor:"#C70039" , 
+                backgroundColor:"#00C72F" , 
                 width: 200 , height:50 ,
                  borderRadius:15 ,
                  marginBottom:20,
                  justifyContent: 'center',
                  alignItems:'center'
            }}
-             onPress={() => console.log("")}
+             onPress={() => navigation.navigate("Home")}
               >
                   
-            <Text style={{color:"#ffff" , fontSize:15}}>Promotion Items</Text>
+            <Text style={{color:"#ffff" , fontSize:15}}>Make Purchase Order</Text>
           </TouchableOpacity>
           </View>
       

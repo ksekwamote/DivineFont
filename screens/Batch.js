@@ -1,4 +1,4 @@
-import React , {useState} from 'react'
+import React , {useState , useEffect} from 'react'
 import { StatusBar, FlatList, Picker, Modal ,Image, Animated, Text, View, Dimensions, StyleSheet, TouchableOpacity, Easing, SafeAreaViewBase, SafeAreaView, SnapshotViewIOS, Pressable, TextInput, Alert, ScrollView } from 'react-native';
 import {sales , dibatch} from "./Home"
 import * as firebase from "firebase"
@@ -14,12 +14,38 @@ export default function Batch({navigation}) {
     const SPACING = 20;
     const AVATAR_SIZE = 70;
     const ITEM_SIZE = AVATAR_SIZE + SPACING*3
-    
-     
+    const [ordersRef , setOrdersRef] = useState(firebase.database().ref("/Orders"))
+    const [DATA , setData] = useState(diOrder)
+
+    useEffect(() => {
+        const unsubscribe = navigation.addListener('focus', () => {
+            // The screen is focused
+           updateDatabase()
+          });
+
+          return unsubscribe;
+      }, [navigation]);
+
+
+    function updateDatabase() {
+
+        var orders =[]
+        setOrdersRef(firebase.database().ref("/Orders"))
+
+        ordersRef.once('value' , function(snapshot){
+      
+            snapshot.forEach(element => {
+              var key =  element.key;
+              var data = element.val();
         
-       
-       
-        const [DATA , setData] = useState(diOrder)
+
+              orders.push({key:key,tag:data.Tag, cell: data.Cell!=undefined ? data.Cell: ""  ,agent: data.Agent,delivery:data.Delivery ,  batch:data.Batch , quantity:data.Quanitity , buyer: data.Buyer ,color: data.Color ,design:data.Design , size: data.Size , font: data.Font})
+            });
+        })
+        .then(()=> setData(orders))
+        //.then(() => diOrder=orders)
+
+      }
 
 
     return (
@@ -94,7 +120,7 @@ export default function Batch({navigation}) {
             
               >
                   <Image source={require("../assets/icons/shopping.png")}/>
-            <Text style={{color:"#ffff" , fontSize:15}}>Batch 1 - {dibatch[0].batch1}  </Text>
+            <Text style={{color:"#ffff" , fontSize:15}}>Batch 1 - {"21 - 27 March"}  </Text>
           </TouchableOpacity>
                 
      
@@ -146,9 +172,10 @@ export default function Batch({navigation}) {
                             <Text style={{fontSize:22 , fontWeight:'700'}}>{item.buyer}</Text>
                             <Text style={{fontSize:14 , opacity: 0.7}}>Date: {item.delivery}</Text>
                             <View style={{flexDirection:'row'}}>
-                                <Text style={{fontSize:12, opacity:0.8 , color:'#0099cc'}}>{item.design}</Text>
-                                <Text style={{fontSize:12, opacity:0.8 , color:'#0099cc'}}>{'  '}Fonts: {item.font}</Text>
+                            <Text style={{fontSize:15 , opacity: 0.7}}>Size: <Text style={{fontWeight: 'bold'}}>{item.size}</Text></Text>
+                           
                             </View>
+                            <Text style={{fontSize:15 , opacity: 0.7}}>Quantity: <Text style={{fontWeight: 'bold'}}>{item.quantity}</Text></Text> 
                             
                         </View>
                     </View>
@@ -225,7 +252,7 @@ export default function Batch({navigation}) {
             
               >
                   <Image source={require("../assets/icons/shopping.png")}/>
-            <Text style={{color:"#ffff" , fontSize:15}}>Batch 2 - {dibatch[0].batch2} </Text>
+            <Text style={{color:"#ffff" , fontSize:15}}>Batch 2 - {"28 March - 03 April"} </Text>
           </TouchableOpacity>
 
 
@@ -270,10 +297,12 @@ export default function Batch({navigation}) {
                         <View>
                             <Text style={{fontSize:22 , fontWeight:'700'}}>{item.buyer}</Text>
                             <Text style={{fontSize:14 , opacity: 0.7}}>Date: {item.delivery}</Text>
-                            <View style={{flexDirection:'row'}}>
-                                <Text style={{fontSize:12, opacity:0.8 , color:'#0099cc'}}>{item.design}</Text>
-                                <Text style={{fontSize:12, opacity:0.8 , color:'#0099cc'}}>{'  '}Fonts: {item.font}</Text>
+                            
+                            <View style={{flexDirection:'row' , justifyContent:'space-between'}}>
+                            <Text style={{fontSize:15 , opacity: 0.7}}>Size: <Text style={{fontWeight: 'bold'}}>{item.size}</Text></Text>
                             </View>
+
+                            <Text style={{fontSize:15 , opacity: 0.7}}>Quantity: <Text style={{fontWeight: 'bold'}}>{item.quantity}</Text></Text> 
                             
                         </View>
                     </View>
@@ -315,6 +344,7 @@ export default function Batch({navigation}) {
                             <View>
                                 <Text style={{fontSize:22 , fontWeight:'700'}}>{item.buyer}</Text>
                                 <Text style={{fontSize:14 , opacity: 0.7}}>Date: {item.delivery}</Text>
+                                <Text style={{fontSize:15 , opacity: 0.7}}>Size: <Text style={{fontWeight: 'bold'}}>{item.size}</Text></Text>
                                 <View style={{flexDirection:'row'}}>
                                     <Text style={{fontSize:12, opacity:0.8 , color:'#0099cc'}}>{item.design}</Text>
                                     <Text style={{fontSize:12, opacity:0.8 , color:'#0099cc'}}>{'  '}Fonts: {item.font}</Text>
@@ -348,7 +378,7 @@ export default function Batch({navigation}) {
             
               >
                   <Image source={require("../assets/icons/shopping.png")}/>
-            <Text style={{color:"#ffff" , fontSize:15}}>Batch 3 - {dibatch[0].batch3}</Text>
+            <Text style={{color:"#ffff" , fontSize:15}}>Batch 3 - {"4 - 10 April"}</Text>
           </TouchableOpacity>
 
 
@@ -373,9 +403,9 @@ export default function Batch({navigation}) {
                         <View>
                             <Text style={{fontSize:22 , fontWeight:'700'}}>{item.buyer}</Text>
                             <Text style={{fontSize:14 , opacity: 0.7}}>Date: {item.delivery}</Text>
+                           
                             <View style={{flexDirection:'row'}}>
-                                <Text style={{fontSize:12, opacity:0.8 , color:'#0099cc'}}>{item.design}</Text>
-                                <Text style={{fontSize:12, opacity:0.8 , color:'#0099cc'}}>{'  '}Fonts: {item.font}</Text>
+                            <Text style={{fontSize:15 , opacity: 0.7}}>Size: <Text style={{fontWeight: 'bold'}}>{item.size}</Text></Text>
                             </View>
                             
                         </View>
@@ -425,7 +455,7 @@ export default function Batch({navigation}) {
             
               >
                   <Image source={require("../assets/icons/shopping.png")}/>
-            <Text style={{color:"#ffff" , fontSize:15}}>Batch 4 - {dibatch[0].batch4}</Text>
+            <Text style={{color:"#ffff" , fontSize:15}}>Batch 4 - {"11 - 17 April"}</Text>
           </TouchableOpacity>
 
                 <FlatList
@@ -460,8 +490,7 @@ export default function Batch({navigation}) {
                                     <Text style={{fontSize:22 , fontWeight:'700'}}>{item.buyer}</Text>
                                     <Text style={{fontSize:14 , opacity: 0.7}}>Date: {item.delivery}</Text>
                                     <View style={{flexDirection:'row'}}>
-                                        <Text style={{fontSize:12, opacity:0.8 , color:'#0099cc'}}>{item.design}</Text>
-                                        <Text style={{fontSize:12, opacity:0.8 , color:'#0099cc'}}>{'  '}Fonts: {item.font}</Text>
+                                    <Text style={{fontSize:15 , opacity: 0.7}}>Size: <Text style={{fontWeight: 'bold'}}>{item.size}</Text></Text>
                                     </View>
                                     
                                 </View>
