@@ -19,8 +19,22 @@ export function orderState(props){
 
             >
 
+                
 
-
+          <TouchableOpacity 
+            style={{
+                backgroundColor:"red" , 
+                width: 200 , height:50 ,
+                 borderRadius:15 ,
+                 marginBottom:20,
+                 justifyContent: 'center',
+                 alignItems:'center'
+           }}
+             onPress={() => setNotVisible(false)}
+              >
+                  
+            <Text style={{color:"#ffff" , fontSize:15}}>Close</Text>
+          </TouchableOpacity>
             </Modal>
     )
 

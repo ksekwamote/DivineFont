@@ -60,16 +60,20 @@ salesRef.once('value' , function(snapshot){
   });
 })
 
+export const getAdmin= (emails) =>{
+  if (emails == "ksekwamote@gmail.com" || emails == "paulssie.cp@gmail.com"){
+
+   return true
+
+  }
+  else {
+    return false
+  }
+}
+
 
 
 export {orders , ordersRef , sales , username , theAdmin }
-
-export const firebaseData = () =>{
-
-  
-
-
-}
 
   export default{
     db:db ,
@@ -83,16 +87,7 @@ export function SignIn({navigation}) {
     const [pass , setPass] = useState("")
     const [password , showPassword] = useState(false)
 
-    const getAdmin= (emails) =>{
-      if (emails == "ksekwamote@gmail.com" || emails == "paulssie.cp@gmail.com"){
-   
-       return true
-   
-      }
-      else {
-        return false
-      }
-   }
+
    
    const getUsername = (emails) =>{
    
@@ -127,7 +122,6 @@ export function SignIn({navigation}) {
    
    
    function getAdminUser(emails){
-    // console.log("User Level: "+emails+"   Admin: "+getAdmin(emails))
        username = getUsername(emails)
        theAdmin = getAdmin(emails)
        email = emails

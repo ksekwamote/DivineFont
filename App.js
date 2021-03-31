@@ -8,7 +8,7 @@ import Home from "./screens/Home"
 import Sales from "./screens/Sales"
 import Admin from "./screens/Admin"
 import Social from "./screens/Social"
-import { NavigationContainer } from '@react-navigation/native';
+import { NavigationContainer, useNavigationState } from '@react-navigation/native';
 import Batch from './screens/Batch';
 import Promotion from "./screens/Promotion"
 import { FontAwesome, MaterialCommunityIcons } from '@expo/vector-icons';
@@ -16,6 +16,7 @@ import { AntDesign } from '@expo/vector-icons';
 import {createDrawerNavigator , DrawerContentScrollView} from "@react-navigation/drawer"
 import {username , theAdmin } from "./screens/SignIn"
 import DrawerContent from "./screens/DrawerContent"
+import AdminDrawer from "./screens/AdminDrawer"
 import * as firebase from "firebase"
 
 
@@ -67,11 +68,20 @@ export default function App() {
 
 
   const [fontloaded , setFontLoaded] = useState(false)
+  const [social , setSocial] = useState(false)
   const loadFont = () => {
     return Font.loadAsync({
       'material-community': require('@expo/vector-icons/build/vendor/react-native-vector-icons/Fonts/MaterialCommunityIcons.ttf')
     })
   }
+
+  function setSocialVisible(bool){
+    console.log("Toggle Social Visibility")
+    setSocial(bool)
+  } 
+
+
+
 
   if(!fontloaded){
     <AppLoading
@@ -84,15 +94,15 @@ export default function App() {
 
   
 
-
   return (
-    <NavigationContainer>
-      
+    <NavigationContainer>    
     <Drawer.Navigator
-    drawerContent={ props => <DrawerContent {...props}/> }
+            drawerContent={  props => <DrawerContent {...props}/> }
     screenOptions={{
-      headerShown: true ,
-      headerRight:() => <TouchableOpacity style={{paddingRight:10}}>
+      headerShown: true,
+      headerRight:() => <TouchableOpacity style={{paddingRight:10}}
+          onPress = {()=>setSocial(true)}
+      >
         <Image style={{width:45 , height:45 , borderRadius:25}} source={ firebase.auth().currentUser ? getProfile(username): require("./assets/image/profile/profile.png")}/>
       </TouchableOpacity> 
     }}
@@ -100,14 +110,23 @@ export default function App() {
     >
       
       
-      <Drawer.Screen name="SignIn" component={SignIn} />
-      <Drawer.Screen name="Home" component={Home} />
+      <Drawer.Screen
+        options={{
+          swipeEnabled:false , headerShown: false
+        }}
+        
+      name="SignIn" component={SignIn} />
+      <Drawer.Screen name="Home">
+      {props => <Home {...props} />}
+      </Drawer.Screen>
       <Drawer.Screen name="Sales" component={Sales} />
       <Drawer.Screen name="Batch" component={Batch} />
-      <Drawer.Screen name="Admin" component={Admin} /> 
+      <Drawer.Screen 
+
+      name="Admin" component={Admin} /> 
       <Drawer.Screen name="Social" component={Social} /> 
      <Drawer.Screen name="Promotion" component={Promotion}/> 
-      
+    
  
       
     </Drawer.Navigator>

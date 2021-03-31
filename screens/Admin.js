@@ -235,24 +235,9 @@ export default function Admin({navigation}) {
 <View style={{
       justifyContent:'space-around',
       alignItems: "center",
-      flexDirection:'row' , marginTop:35 }}>
+      flexDirection:'row' , marginTop:15 }}>
 
-          
-           <View>
-        <TouchableOpacity style={{
-             backgroundColor:"#33AAFF" , 
-             width: 50, height:50 ,
-              borderRadius:15 ,
-              marginBottom:20,
-        
-              }}
-             onPress={() => navigation.navigate("Home")}
-              >
-            <Image source={require("../assets/icons/back.png")} />
-          </TouchableOpacity>
-          </View>
-
-               
+    
               <View>
           <TouchableOpacity 
             style={{

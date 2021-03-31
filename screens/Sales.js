@@ -101,70 +101,20 @@ const ITEM_SIZE = AVATAR_SIZE + SPACING*3
 
             
 
-            <View style={{flex: 1,
-      justifyContent:'space-around',
-      alignItems: "center",
-      marginTop: 80 , flexDirection:'row'  , position: 'relative', marginBottom: 50}}>
-
-           
-        <TouchableOpacity style={{
-             backgroundColor:"#33AAFF" , 
-             width: 50, height:50 ,
-             alignItems:'center' ,
-              justifyContent:'center',
-            
-              borderRadius:15 ,
-              marginTop:30,
-              marginBottom:40,
-        
-              }}
-             onPress={() => navigation.navigate("Home")}
-              >
-            <Image source={require("../assets/icons/back.png")} />
-          </TouchableOpacity>
 
 
-          <TouchableOpacity style={{
-             backgroundColor:"#F3188F" , 
-             width: 200 , height:50 ,
-             alignItems:'center' ,
-              justifyContent:'center',
-                flexDirection:'row',
-              borderRadius:15 ,
-              marginTop:30,
-              marginBottom:40
-              }}
-            
-              >
-                  <Image source={require("../assets/icons/shopping.png")}/>
-            <Text style={{color:"#ffff" , fontSize:15}}>Completed Sales </Text>
-          </TouchableOpacity>
-
-
-           
-        
-            <TouchableOpacity style={{
-           
-             width:50  , height:50 ,
-             alignItems:'center' ,
-              justifyContent:'center',
-            
-              borderRadius:15 ,
-              marginTop:30,
-              marginBottom:40,
-              }}
-             onPress={() => navigation.navigate("Batch")}
-              >
-          <Image source={require("../assets/icons/batch.png")} />
-          </TouchableOpacity>
-          
-
-         
-
+             
+        {
+          theAdmin ?  
+          <View style={styles.centeredViewSales}>
+          <Text style={{fontSize:20}}>Total Sales: <Text style={{fontWeight:'bold'}}> {DATA.length}</Text></Text>
           </View>
-
-                
-     
+          
+          :
+          <View style={styles.centeredViewSales}>
+          <Text style={{fontSize:20 , fontWeight:'bold'}}>Total Sales: <Text style={{fontWeight:'bold'}}>{DATA.filter(item => {return item.agent==username.trim()}).length}</Text> </Text>
+          </View>
+        }
             
               
 
@@ -249,6 +199,9 @@ const ITEM_SIZE = AVATAR_SIZE + SPACING*3
 
                       return (
                           <View>
+
+                                    
+
                           <Animated.View style={{
                               shadowColor:"#000",
                       shadowOffset: {
@@ -306,6 +259,13 @@ const styles = StyleSheet.create({
       justifyContent: "center",
       alignItems: "center",
       marginTop: 22
+    },
+    centeredViewSales: {
+      flex: 1,
+      justifyContent: "center",
+      alignItems: "center",
+      marginTop: 22,
+      marginBottom: 15
     },
     TextInputStyleClass:{
  

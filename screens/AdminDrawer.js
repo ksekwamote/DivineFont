@@ -29,7 +29,7 @@ import * as firebase from "firebase"
 import { createIconSetFromIcoMoon} from '@expo/vector-icons';
 
 
-export default function DrawerContent(props) {
+export default function AdminDrawer(props) {
 
     const [theUser , setUser] = useState(username)
 
@@ -110,24 +110,24 @@ export default function DrawerContent(props) {
                         <DrawerItem 
                             icon={({color, size}) => (
                                 <Icon 
-                                name="cash-multiple" 
+                                name="chart-histogram" 
                                 color={color}
                                 size={size}
                                 />
                             )}
                             label="Sales"
-                            onPress={() => {props.navigation.navigate('Sales')}}
+                            onPress={() => console.log("This")}
                         />
                         <DrawerItem 
                             icon={({color, size}) => (
                                 <Icon 
-                                name="cart-arrow-down" 
+                                name="cart-variant" 
                                 color={color}
                                 size={size}
                                 />
                             )}
                             label="Batch"
-                            onPress={() => {props.navigation.navigate('Batch')}}
+                            onPress={() => console.log("This and that")}
                         />
                          <DrawerItem 
                             icon={({color, size}) => (
@@ -140,28 +140,7 @@ export default function DrawerContent(props) {
                             label="Promotion"
                             onPress={() => {props.navigation.navigate('Promotion')}}
                         />
-                        <DrawerItem 
-                            icon={({color, size}) => (
-                                <Icon 
-                                name="shield-lock" 
-                                color={color}
-                                size={size}
-                                />
-                            )}
-                            label="Admin"
-                            onPress={() => {theAdmin? props.navigation.navigate('Admin'): alert("This section is for admins only")}}
-                        />
-                        <DrawerItem 
-                            icon={({color, size}) => (
-                                <Icon 
-                                name="spotify" 
-                                color={color}
-                                size={size}
-                                />
-                            )}
-                            label="Social" 
-                            onPress={() => { theAdmin? props.navigation.navigate('Social'): alert("This section is for admins only")}}
-                        />
+                       
                         
                     </Drawer.Section>
                 </View>

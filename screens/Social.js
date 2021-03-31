@@ -261,9 +261,9 @@ export default function Social({navigation}) {
     function getPromoDatabase() {
 
         var orders =[]
-        setOrdersRef(firebase.database().ref("/Promotion"))
+        setOrdersRef(firebase.database().ref("/Orders"))
 
-        promoref.once('value' , function(snapshot){
+      ordersRef.once('value' , function(snapshot){
       
             snapshot.forEach(element => {
               var key =  element.key;
@@ -293,15 +293,17 @@ export default function Social({navigation}) {
     function updatePromo(){
 
         var orders =[]
-        setOrdersRef(firebase.database().ref("/Promotion"))
+        setOrdersRef(firebase.database().ref("/Orders"))
 
-        promoref.once('value' , function(snapshot){
+        ordersRef.once('value' , function(snapshot){
       
             snapshot.forEach(element => {
               var key =  element.key;
               var data = element.val();
-        
-              orders.push({key:key,tag:data.Tag, quantity:data.Quanitity , buyer: data.Buyer ,color: data.Color ,design:data.Design , size: data.Size , font: data.Font})
+
+              if (data.Agent =="Social"){
+              orders.push({key:key,tag:data.Tag, agent: data.Agent, quantity:data.Quanitity , buyer: data.Buyer ,color: data.Color ,design:data.Design , size: data.Size , font: data.Font})
+              }
             });
         })
 
@@ -356,9 +358,8 @@ export default function Social({navigation}) {
         if (admin){
             return ( [
                 {
-                text: 'Sold',
-                backgroundColor:"#FF33DD",
-                onPress: ()=>{addPromoToSales(item)}
+                text: 'Social',
+              
               
                 } ,
              
@@ -396,53 +397,6 @@ export default function Social({navigation}) {
 
         
             
-            <View style={{
-      justifyContent:'space-around',
-      alignItems: "center",
-      flexDirection:'row' , marginTop:40 }}>
-
-          
-          
-
-               
-              <View>
-          <TouchableOpacity 
-            style={{
-                backgroundColor:"#33AAFF" , 
-                width: 75, height:50 ,
-                 borderRadius:30,
-                 marginBottom:20,
-                 justifyContent: 'center',
-                 alignItems:'center'
-           }}
-             onPress={() => navigation.navigate("Home")}
-              >
-                  
-            <Text style={{color:"#ffff" , fontSize:15}}>Back</Text>
-          </TouchableOpacity>
-          </View>
-        
-          <View>
-          <TouchableOpacity 
-            style={{
-                backgroundColor:"#00C72F" , 
-                width: 200 , height:50 ,
-                 borderRadius:15 ,
-                 marginBottom:20,
-                 justifyContent: 'center',
-                 alignItems:'center'
-           }}
-             onPress={() => navigation.navigate("Home")}
-              >
-                  
-            <Text style={{color:"#ffff" , fontSize:15}}>Make Purchase Order</Text>
-          </TouchableOpacity>
-          </View>
-      
-
-
-          </View>
-
 
 
     
@@ -482,8 +436,10 @@ export default function Social({navigation}) {
                         outputRange: [1,1,1,0]
                     })
 
-                
+               
                     return (
+
+                      
                         <View>
                         <Animated.View style={{
                             shadowColor:"#000",
@@ -499,15 +455,7 @@ export default function Social({navigation}) {
 
                         }}>
 
-                    <Swipeout  style={{borderRadius:12 , height: 110 , marginBottom:SPACING}} 
-                    
-
-                    left={
-
-                       adminButtons(item)
-
-                    }
-                 >
+                  
                     <View style={{flexDirection:'row' ,padding: SPACING , marginBottom:SPACING , backgroundColor: "rgba(255,255,240, .7)" , borderRadius:12 ,
                     
                     
@@ -533,13 +481,13 @@ export default function Social({navigation}) {
                            
                         </View>
                     </View>
-                    </Swipeout>
+                    
                     </Animated.View>
                     </View>
                   
                     )
 
-    
+                  
               
 
                 }}
@@ -550,6 +498,7 @@ export default function Social({navigation}) {
     </View>
       
     )
+    
 }
 
 

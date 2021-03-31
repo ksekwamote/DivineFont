@@ -4,7 +4,7 @@ import { StatusBar,Platform , FlatList, Picker,BackHandler, Modal ,Image, Animat
 const { width, height } = Dimensions.get('screen');
 import faker from 'faker'
 import Constants from 'expo-constants';
-import {orders , theAdmin , username } from "./SignIn"
+import {orders , theAdmin , username , getAdmin } from "./SignIn"
 import {shirt} from "../assets/image/Shirts"
 import Swipeout from 'react-native-swipeout'
 import * as firebase from "firebase"
@@ -212,13 +212,59 @@ const SPACING = 20;
 const AVATAR_SIZE = 70;
 const ITEM_SIZE = AVATAR_SIZE + SPACING*3;
 
-export default function Home({navigation}) {
+export default function Home({navigation} , props) {
 
     
     const [expoPushToken, setExpoPushToken] = useState('');
     const [notification, setNotification] = useState(false);
+    const [sms , setSms] = useState("")
+    const [title , setTitle] = useState("") 
     const notificationListener = useRef();
     const responseListener = useRef();
+
+    
+    useEffect(() => {
+        registerForPushNotificationsAsync().then(token => setExpoPushToken(token));
+    
+        // This listener is fired whenever a notification is received while the app is foregrounded
+        notificationListener.current = Notifications.addNotificationReceivedListener(notification => {
+          setNotification(notification);
+        });
+    
+        // This listener is fired whenever a user taps on or interacts with a notification (works when app is foregrounded, backgrounded, or killed)
+        responseListener.current = Notifications.addNotificationResponseReceivedListener(response => {
+          console.log(response);
+        });
+    
+        return () => {
+          Notifications.removeNotificationSubscription(notificationListener.current);
+          Notifications.removeNotificationSubscription(responseListener.current);
+        };
+      }, []);
+
+      async function sendPushNotification(expoPushToken , sms, title)  {
+        const message = {
+          to: expoPushToken,
+          sound: 'default',
+          title: title,
+          body: sms,
+          data: { someData: 'goes here' },
+        };
+      
+        await fetch('https://exp.host/--/api/v2/push/send', {
+          method: 'POST',
+          headers: {
+            Accept: 'application/json',
+            'Accept-encoding': 'gzip, deflate',
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(message),
+        })
+        .then(() => setNotVisible(false))
+        .then(() =>alert("Notification has been sent"))
+      }
+
+
 
     useEffect(() => {
         const unsubscribe = navigation.addListener('focus', () => {
@@ -235,6 +281,25 @@ export default function Home({navigation}) {
         return () =>
           BackHandler.removeEventListener('hardwareBackPress', () => true)
       }, [])
+
+
+      useEffect(() => {
+        const unlisten = firebase.auth().onAuthStateChanged(user => {
+          var userC = firebase.auth().currentUser;
+           if (user){
+            console.log(`This userrrrr is logged in:  ${userC.email}`)
+           setAdmin(getAdmin(userC.email))
+           }
+          },
+        );
+  
+        return () => {
+  
+         unlisten();
+         
+        }
+  
+      }); 
   
   
 
@@ -286,6 +351,9 @@ export default function Home({navigation}) {
     const [orderState , setOrderState] = useState(false)
     const [socialVisible , setSocialVisible] = useState(false)
 
+   
+   
+   
     const setToZero =()=>{
         setColor("0")
         setDesign("0")
@@ -569,6 +637,7 @@ export default function Home({navigation}) {
             { cancelable: false }
           ))
         .then(() => updateInvisible())
+        .then(()=>sendPushNotification(expoPushToken ,`${item.agent} has updated ${item.buyer}'s order` , "Item Updated"))
         
 
     }
@@ -599,6 +668,7 @@ export default function Home({navigation}) {
             { cancelable: false }
           ))
           .then(()=>setBackVisible(false))
+          .then(()=>sendPushNotification(expoPushToken ,`${item.agent} has updated ${item.buyer}'s order` , "Item Updated"))
 
     }
 
@@ -646,6 +716,7 @@ export default function Home({navigation}) {
     ordersRef.child(item.key).remove()
     .then(()=>updateDatabase())
     .then(()=>updateSalesDatabase())
+    .then(()=>sendPushNotification(expoPushToken ,`${item.agent} had sold a T-shirt(s)` , "Item SOLD"))
     
  }
 
@@ -661,6 +732,7 @@ export default function Home({navigation}) {
         ],
         { cancelable: false }
       ))
+    .then(()=>sendPushNotification(expoPushToken ,`${item.agent} has deleted ${item.buyer}'s order` , "Item Deleted"))
       
      
  }
@@ -952,13 +1024,20 @@ export default function Home({navigation}) {
             </Modal>
             </View>
 
+            <Swipeout right={
+                [
+                    {
+                      text: 'Button'
+                    }
+                  ]
+            }>
             <View style={styles.centeredView}>
             <Modal
             animationType="slide"
             transparent={true}
             visible={socialVisible}
             onRequestClose={()=>{
-                setPurchaseVisible(!socialVisible)
+                setSocialVisible(false)
             }}
             >
                 <View style={styles.centeredView}>
@@ -1126,6 +1205,7 @@ export default function Home({navigation}) {
 
             </Modal>
             </View>
+            </Swipeout>
 
 
 {/**UPDATE PURCHASE */}
@@ -1332,7 +1412,7 @@ export default function Home({navigation}) {
             <View style={{
       justifyContent:'space-around',
       alignItems: "center",
-      flexDirection:'row' , marginTop:-100 }}>
+      flexDirection:'row' , marginTop:-125 }}>
 
         
 
@@ -1348,6 +1428,7 @@ export default function Home({navigation}) {
                  alignItems:'center'
            }}
              onPress={() => setPurchaseVisible(true)}
+             onLongPress = {() => setSocialVisible(true)}
               >
                   
             <Text style={{color:"#ffff" , fontSize:15}}>Make Purchase Order </Text>
@@ -1484,7 +1565,9 @@ export default function Home({navigation}) {
                   
                     )}
 
-                    else if (item.agent == username.trim()){
+                    else{
+
+                    if (item.agent == username.trim()){
                         return (
                             <View>
                             <Animated.View style={{
@@ -1558,7 +1641,9 @@ export default function Home({navigation}) {
 
               
 
-                }}
+                }
+            }
+            }
 
 
             />

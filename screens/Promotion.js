@@ -392,59 +392,6 @@ export default function Promotion({navigation}) {
         <View style={styles.centeredView}>
       
         </View >
-            
-
-        
-            
-            <View style={{
-      justifyContent:'space-around',
-      alignItems: "center",
-      flexDirection:'row' , marginTop:40 }}>
-
-          
-          
-
-               
-              <View>
-          <TouchableOpacity 
-            style={{
-                backgroundColor:"#33AAFF" , 
-                width: 75, height:50 ,
-                 borderRadius:30,
-                 marginBottom:20,
-                 justifyContent: 'center',
-                 alignItems:'center'
-           }}
-             onPress={() => navigation.navigate("Home")}
-              >
-                  
-            <Text style={{color:"#ffff" , fontSize:15}}>Back</Text>
-          </TouchableOpacity>
-          </View>
-        
-          <View>
-          <TouchableOpacity 
-            style={{
-                backgroundColor:"#C70039" , 
-                width: 200 , height:50 ,
-                 borderRadius:15 ,
-                 marginBottom:20,
-                 justifyContent: 'center',
-                 alignItems:'center'
-           }}
-             onPress={() => console.log("")}
-              >
-                  
-            <Text style={{color:"#ffff" , fontSize:15}}>Promotion Items</Text>
-          </TouchableOpacity>
-          </View>
-      
-
-
-          </View>
-
-
-
     
             {/**Purchase Orders */}
             <Animated.FlatList

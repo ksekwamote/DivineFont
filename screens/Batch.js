@@ -60,48 +60,6 @@ export default function Batch({navigation}) {
                 blurRadius={50}
             />
 
-            
-
-            <View style={{flex: 1,
-      justifyContent:'space-around',
-      alignItems: "center",
-      marginTop: 80 , flexDirection:'row'  , position: 'relative' , marginBottom: 50}}>
-
-           
-        <TouchableOpacity style={{
-             backgroundColor:"#33AAFF" , 
-             width: 50, height:50 ,
-             alignItems:'center' ,
-              justifyContent:'center',
-            
-              borderRadius:15 ,
-              marginTop:30,
-              marginBottom:40,
-        
-              }}
-             onPress={() => navigation.navigate("Sales")}
-              >
-            <Image source={require("../assets/icons/back.png")} />
-          </TouchableOpacity>
-
-
-          <TouchableOpacity style={{
-             backgroundColor:"#F3188F" , 
-             width: 200 , height:50 ,
-             alignItems:'center' ,
-              justifyContent:'center',
-                flexDirection:'row',
-              borderRadius:15 ,
-              marginTop:30,
-              marginBottom:40
-              }}
-            
-              >
-                  <Image source={require("../assets/icons/shopping.png")}/>
-            <Text style={{color:"#ffff" , fontSize:15}}>Sales Batches </Text>
-          </TouchableOpacity>
-
-          </View>
 
 
           <ScrollView>
