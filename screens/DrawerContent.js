@@ -1,7 +1,8 @@
 import React , {useEffect , useState} from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet , Switch } from 'react-native';
 import * as Font from "expo-font"
 import AppLoading from 'expo-app-loading';
+import {changeAdmin} from "../redux/action/actions"
 import {
     useTheme,
     Avatar,
@@ -10,8 +11,7 @@ import {
     Paragraph,
     Drawer,
     Text,
-    TouchableRipple,
-    Switch
+    TouchableRipple
 } from 'react-native-paper';
 import {
     DrawerContentScrollView,
@@ -21,17 +21,32 @@ import {
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { AntDesign } from '@expo/vector-icons'; 
 import {getProfile} from "../App"
-import {username , email , theAdmin} from "./SignIn"
+import {username , email , theAdmin , getAdmin} from "./SignIn"
 import { useNavigation } from '@react-navigation/native';
 import {FontAwesome } from '@expo/vector-icons';
 import {useFonts} from "expo-font"
+import { useDispatch} from "react-redux"
 import * as firebase from "firebase"
 import { createIconSetFromIcoMoon} from '@expo/vector-icons';
 
+var admin =false;
+
+export {admin}
 
 export default function DrawerContent(props) {
 
     const [theUser , setUser] = useState(username)
+    const dispatch = useDispatch();
+    const [isEnabled, setIsEnabled] = useState(true);
+    const [admin , setAdmin] = useState(true)
+
+    const toggleSwitch = () => 
+    {
+            setIsEnabled(previousState => !previousState);
+            dispatch(changeAdmin())
+         }
+
+   
 
     var firebaseConfig = {
         apiKey: "AIzaSyAa18AY9FZodtVk4NTvSVQGzmQF0iCkIQw",
@@ -41,6 +56,22 @@ export default function DrawerContent(props) {
         messagingSenderId: "981744332243",
         appId: "1:981744332243:web:c5cc62ec6395a360755326"
       };
+
+      useEffect(() => {
+        const unlisten = firebase.auth().onAuthStateChanged(user => {
+          var userC = firebase.auth().currentUser;
+           if (user){
+           
+           setAdmin(getAdmin(userC.email))
+           }
+          },
+        );
+  
+        return () => {
+  
+         unlisten();
+        }
+      }); 
     
     
       if(!firebase.apps.length){
@@ -78,8 +109,18 @@ export default function DrawerContent(props) {
                                 
                             <View style={{marginLeft:15, flexDirection:'column'}}>
                                 <Title style={styles.title}>{username}</Title>
-                            <Caption style={styles.caption}>{email}</Caption>
-                                
+                           
+                           
+                      { admin ?  <Text><Caption style={styles.caption}>Admin</Caption>  <Switch
+                                trackColor={{ false: "#767577", true: "#81b0ff" }}
+                                thumbColor={isEnabled ? "#f5dd4b" : "#f4f3f4"}
+                                ios_backgroundColor="#3e3e3e"
+                                onValueChange={toggleSwitch}
+                                value={isEnabled}
+                            /></Text> : <View></View>  }
+                            
+                          
+                             
                             </View>
                         </View>
 

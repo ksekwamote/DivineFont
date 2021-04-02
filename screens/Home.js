@@ -10,6 +10,8 @@ import Swipeout from 'react-native-swipeout'
 import * as firebase from "firebase"
 import DatePicker from 'react-native-datepicker'
 import * as Notifications from 'expo-notifications';
+import {admin} from "./DrawerContent"
+import {useSelector , useDispatch} from "react-redux"
 
 
 
@@ -25,6 +27,80 @@ Notifications.setNotificationHandler({
 
     })
 })
+
+const pickPrayer = (color , font , design)=>{
+
+  if (font == "Black"){
+      switch (color) {
+          case "White":
+              return require("../assets/image/prayer/prayer1.jpg")
+              break;
+          case "Pink":
+              return require("../assets/image/prayer/prayer2.jpg")
+                break;
+          case "Maroon":
+              return require("../assets/image/prayer/prayer3.jpg")
+                break;
+          case "Grey":
+              return require("../assets/image/prayer/prayer4.jpg")
+                break;
+          case "Yellow":
+              return require("../assets/image/prayer/prayer5.jpg")
+                break;
+          default:
+              break;
+      }
+  }
+  else if (font == "White"){
+      switch (color) {
+          case "Black":
+              return require("../assets/image/prayer/prayer6.jpg")
+              break;
+          case "Pink":
+              return require("../assets/image/prayer/prayer7.jpg")
+                break;
+          case "Maroon":
+              return require("../assets/image/prayer/prayer8.jpg")
+                break;
+          case "Navy":
+              return require("../assets/image/prayer/prayer9.jpg")
+                break;
+          case "Yellow":
+              return require("../assets/image/prayer/prayer10.jpg")
+                break;
+          default:
+              break;
+      }
+  }
+  else {
+      switch (color) {
+          case "Black":
+              return require("../assets/image/prayer/prayer11.jpg")
+              break;
+          case "Grey":
+              return require("../assets/image/prayer/prayer12.jpg")
+                break;
+          case "Maroon":
+              return require("../assets/image/prayer/prayer13.jpg")
+                break;
+          case "Pink":
+              return require("../assets/image/prayer/prayer14.jpg")
+                break;
+          case "Navy":
+              return require("../assets/image/prayer/prayer15.jpg")
+                break;
+          case "White":
+              return require("../assets/image/prayer/prayer16.jpg")
+                break;
+          default:
+              break;
+      }
+  }
+
+
+}
+
+
 
 export const pickShirt =(color , font ,design) =>{
 
@@ -58,6 +134,10 @@ export const pickShirt =(color , font ,design) =>{
     const shirtPink = 27
     const shirtWhite =36
     const shirtYellow =42
+
+    if (design =="Prayer"){
+        return pickPrayer(color , font , design)
+    }
 
     switch(design){
         case "Jesus":
@@ -195,12 +275,12 @@ batchesRef.once('value' , function(snapshot){
     snapshot.forEach(element => {
       var key =  element.key;
       var data = element.val();
-
+      
      
       dibatch.push({batch1: data.Batch1,  batch2: data.Batch2 , batch3: data.Batch3 , batch4: data.Batch4})
   
     });
-    //console.log(`this has run ${dibatch[0].batch1}`)
+    
 
   })
 
@@ -221,6 +301,9 @@ export default function Home({navigation} , props) {
     const [title , setTitle] = useState("") 
     const notificationListener = useRef();
     const responseListener = useRef();
+
+    const dipatch = useDispatch();
+    const isAdmin = useSelector(state => state.admin)
 
     
     useEffect(() => {
@@ -305,6 +388,7 @@ export default function Home({navigation} , props) {
 
     var orderss =[];
     const [ordersRef , setOrdersRef] = useState(firebase.database().ref("/Orders"))
+    const [deletedRef , setDeletedRef] = useState(firebase.database().ref("/Deleted"))
    
     const batchRef =firebase.database().ref("/Batch")
     ordersRef.once('value' , function(snapshot){
@@ -421,6 +505,30 @@ export default function Home({navigation} , props) {
       
         
     }
+
+
+    function deletedOrders(item) {
+      
+
+        firebase.database().ref("/Deleted").push(
+
+            {
+                 Agent:username ,
+            Buyer: item.buyer ,
+            Color: item.color,
+            Design:item.design,
+            Font: item.font,
+            Quanitity: parseInt(item.quantity),
+            Size: item.size,
+            Date: new Date().toLocaleString(),
+        
+
+            }
+
+        ).then(()=> console.log("Added to table"))
+        .catch((err)=> console.log(err) )
+    }
+
 
 
     function updateDatabase2() {
@@ -711,6 +819,9 @@ export default function Home({navigation} , props) {
     navigation.navigate("Sales")
  }
 
+
+ //ITEM IS SOLD, DELETE IT FROM ORRDERS AND TRANSFER TO SALES
+
  function deleteOrderSales(item) {
 
     ordersRef.child(item.key).remove()
@@ -732,6 +843,7 @@ export default function Home({navigation} , props) {
         ],
         { cancelable: false }
       ))
+      .then(()=> deletedOrders(item)) 
     .then(()=>sendPushNotification(expoPushToken ,`${item.agent} has deleted ${item.buyer}'s order` , "Item Deleted"))
       
      
@@ -887,6 +999,7 @@ export default function Home({navigation} , props) {
             <Picker.Item label="Grey" value="Grey" />
             <Picker.Item label="Maroon" value="Maroon" />
             <Picker.Item label="Yellow" value="Yellow" />
+            <Picker.Item label="Pink" value="Pink" />
     </Picker>
 
     <Picker
@@ -899,6 +1012,7 @@ export default function Home({navigation} , props) {
             <Picker.Item label="Jesus" value="Jesus" />
             <Picker.Item label="Rooted in Christ" value="Rooted" />
             <Picker.Item label="Keyboard" value="Keys" />
+            <Picker.Item label="Prayer Warrior" value="Prayer" />
     </Picker>
 
     <Picker
@@ -1253,6 +1367,7 @@ export default function Home({navigation} , props) {
             <Picker.Item label="Jesus" value="Jesus" />
             <Picker.Item label="Rooted in Christ" value="Rooted" />
             <Picker.Item label="Keyboard" value="Keys" />
+            <Picker.Item label="Prayer Warrior" value="Prayer" />
     </Picker>
 
     <Picker
@@ -1420,7 +1535,8 @@ export default function Home({navigation} , props) {
               <View>
           <TouchableOpacity 
             style={{
-                backgroundColor:"#33AAFF" , 
+               // #C70039 #33AAFF
+                backgroundColor:"#900C3F", 
                 width: 200 , height:50 ,
                  borderRadius:15 ,
                  marginBottom:10,
@@ -1434,6 +1550,9 @@ export default function Home({navigation} , props) {
             <Text style={{color:"#ffff" , fontSize:15}}>Make Purchase Order </Text>
           </TouchableOpacity>
           </View>
+
+        
+
           </View>
 
         
@@ -1474,7 +1593,7 @@ export default function Home({navigation} , props) {
                         outputRange: [1,1,1,0]
                     })
 
-                    if (admin){
+                    if (admin == isAdmin){
                     return (
                         <View>
                         <Animated.View style={{

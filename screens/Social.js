@@ -243,6 +243,7 @@ export default function Social({navigation}) {
     const scrollY = React.useRef(new Animated.Value(0)).current
 
     const [admin , setAdmin] = useState(theAdmin)
+    const [count  , setCount] = useState(0)
  
    
     
@@ -302,8 +303,12 @@ export default function Social({navigation}) {
               var data = element.val();
 
               if (data.Agent =="Social"){
+
+                setCount(count+ data.Quanitity)
+
               orders.push({key:key,tag:data.Tag, agent: data.Agent, quantity:data.Quanitity , buyer: data.Buyer ,color: data.Color ,design:data.Design , size: data.Size , font: data.Font})
-              }
+              
+            }
             });
         })
 
@@ -393,13 +398,7 @@ export default function Social({navigation}) {
         <View style={styles.centeredView}>
       
         </View >
-            
-
         
-            
-
-
-    
             {/**Purchase Orders */}
             <Animated.FlatList
                 onScroll ={Animated.event(

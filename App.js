@@ -18,6 +18,10 @@ import {username , theAdmin } from "./screens/SignIn"
 import DrawerContent from "./screens/DrawerContent"
 import AdminDrawer from "./screens/AdminDrawer"
 import * as firebase from "firebase"
+import { Provider } from 'react-redux'
+import { applyMiddleware, createStore } from 'redux'
+import allReducers  from "./redux/reducer/adminReducer"
+import thunk from "redux-thunk"
 
 
 var firebaseConfig = {
@@ -63,12 +67,15 @@ export const getProfile = user =>{
 
 const Drawer = createDrawerNavigator()
 
+const store = createStore(allReducers , applyMiddleware(thunk))
+
 export default function App() {
 
 
 
   const [fontloaded , setFontLoaded] = useState(false)
   const [social , setSocial] = useState(false)
+
   const loadFont = () => {
     return Font.loadAsync({
       'material-community': require('@expo/vector-icons/build/vendor/react-native-vector-icons/Fonts/MaterialCommunityIcons.ttf')
@@ -95,6 +102,7 @@ export default function App() {
   
 
   return (
+    <Provider store={store}>
     <NavigationContainer>    
     <Drawer.Navigator
             drawerContent={  props => <DrawerContent {...props}/> }
@@ -131,6 +139,7 @@ export default function App() {
       
     </Drawer.Navigator>
     </NavigationContainer>
+    </Provider>
     
   );
 }

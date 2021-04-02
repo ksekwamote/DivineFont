@@ -71,6 +71,37 @@ export const getAdmin= (emails) =>{
   }
 }
 
+export const getUsername = (emails) =>{
+   
+  switch (emails) {
+    case "ksekwamote@gmail.com":
+      return "Kutlo"
+    case "paulssie.cp@gmail.com":
+      return "Cassie" 
+   case "emmaxtido@gmail.com":
+     return "Mooketsi"
+   case "poslekobane@gmail.com":
+     return "Portia"
+   case "kaonephaladi@gmail.com":
+     return "Phaladi"
+   case "wamebogosi@gmail.com":
+     return "Wame"
+   case "dimphobaruti554@gmail.com":
+     return "Dimpho"
+   case "nellyseane@mobileworship.com":
+     return "Nelly"
+   case "master@mobileworship.com":
+     return "Master"
+   case "faith@mobileworship.com":
+     return "Faith"
+   case "oratilelebani@mobileworship.com":
+     return "Lolo"
+    default:
+      return ""
+  }
+
+}
+
 
 
 export {orders , ordersRef , sales , username , theAdmin }
@@ -89,36 +120,7 @@ export function SignIn({navigation}) {
 
 
    
-   const getUsername = (emails) =>{
    
-         switch (emails) {
-           case "ksekwamote@gmail.com":
-             return "Kutlo"
-           case "paulssie.cp@gmail.com":
-             return "Cassie" 
-          case "emmaxtido@gmail.com":
-            return "Mooketsi"
-          case "poslekobane@gmail.com":
-            return "Portia"
-          case "kaonephaladi@gmail.com":
-            return "Phaladi"
-          case "wamebogosi@gmail.com":
-            return "Wame"
-          case "dimphobaruti554@gmail.com":
-            return "Dimpho"
-          case "nellyseane@mobileworship.com":
-            return "Nelly"
-          case "master@mobileworship.com":
-            return "Master"
-          case "faith@mobileworship.com":
-            return "Faith"
-          case "oratilelebani@mobileworship.com":
-            return "Lolo"
-           default:
-             return ""
-         }
-   
-   }
    
    
    function getAdminUser(emails){

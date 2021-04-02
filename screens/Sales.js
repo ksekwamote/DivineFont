@@ -1,16 +1,20 @@
 import React , {useState , useEffect} from 'react'
 import { StatusBar, FlatList, Picker, Modal ,Image, Animated, Text, View, Dimensions, StyleSheet, TouchableOpacity, Easing, SafeAreaViewBase, SafeAreaView, SnapshotViewIOS, Pressable, TextInput, Alert } from 'react-native';
 import {sales} from "./Home"
-import {theAdmin , username} from "./SignIn"
+import {theAdmin , username , getAdmin , getUsername} from "./SignIn"
 import * as firebase from "firebase"
 import {shirt} from "../assets/image/Shirts"
 import Swipeout from 'react-native-swipeout'
 import {pickShirt} from "./Home"
+import {useSelector , useDispatch} from "react-redux"
 
 
 
 export default function Sales({navigation}) {
 
+
+  const dipatch = useDispatch();
+  const isAdmin = useSelector(state => state.admin)
 
     const SPACING = 20;
 const AVATAR_SIZE = 70;
@@ -50,30 +54,72 @@ const ITEM_SIZE = AVATAR_SIZE + SPACING*3
     const [salesRef , setSalesRef] = useState(firebase.database().ref("/Sales"))
     const [ordersRef , setOrdersRef] = useState(firebase.database().ref("/Orders"))
     const scrollY = React.useRef(new Animated.Value(0)).current
+    const [DATA , setData] = useState(sales)
+    const [count , setCount] =useState(0)
+    const [admin , setAdmin] = useState(theAdmin)
+    const [user , setUser ] = useState(username)
+    
+
 
     
     useEffect(() => {
       const unsubscribe = navigation.addListener('focus', () => {
           // The screen is focused
           updateSalesDatabase()
+
         });
 
         return unsubscribe;
     }, [navigation]);
 
 
+    useEffect(() => {
+      const unlisten = firebase.auth().onAuthStateChanged(user => {
+        var userC = firebase.auth().currentUser;
+         if (user){
+              setAdmin(getAdmin(userC.email))
+              setUser(getUsername(userC.email))
+         }
+
+        },
+      );
+
+      return () => {
+
+       unlisten();
+       
+      }
+
+    }); 
+
+    
+
+
 
     function updateSalesDatabase(){
 
       var theSales =[]
+      var suma = 0
 
       salesRef.once('value' , function(snapshot){
       
         snapshot.forEach(element => {
           var key =  element.key;
           var data = element.val();
-    
+
+          if (admin){
+            suma = suma + parseInt(data.Quanitity)
+           // console.log(`count: ${count} + quantity: ${data.Quanitity} = sum: ${suma}`)
+           
+          }
+          else if(user == data.Agent) {
+           suma = suma + parseInt(data.Quanitity)
+            //setCount(count + parseInt(data.Quanitity))
+          }
+          setCount(suma)
+          
           theSales.push({key:key, agent: data.Agent, quantity:data.Quanitity , buyer: data.Buyer ,color: data.Color ,design:data.Design , size: data.Size , font: data.Font})
+       
         })
     })
     .then(()=>  setData(theSales) )
@@ -83,7 +129,7 @@ const ITEM_SIZE = AVATAR_SIZE + SPACING*3
     
     
    
-    const [DATA , setData] = useState(sales)
+    
 
 
 
@@ -105,9 +151,9 @@ const ITEM_SIZE = AVATAR_SIZE + SPACING*3
 
              
         {
-          theAdmin ?  
+          admin==isAdmin ?  
           <View style={styles.centeredViewSales}>
-          <Text style={{fontSize:20}}>Total Sales: <Text style={{fontWeight:'bold'}}> {DATA.length}</Text></Text>
+          <Text style={{fontSize:20}}>Total Sales: <Text style={{fontWeight:'bold'}}> {count}</Text></Text>
           </View>
           
           :
@@ -153,7 +199,7 @@ const ITEM_SIZE = AVATAR_SIZE + SPACING*3
                     })
 
 
-                    if (theAdmin){
+                    if (admin ==isAdmin){
 
                     return (
                         <View>
